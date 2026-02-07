@@ -57,7 +57,7 @@
         <button id="btn-switch" class="nav-btn" onclick="switchScene('scene-garden')">🏡</button>
     </div>
 
-    <div id="scene-garden" class="scene" style="background-image: url('assets/scenes/MagicGarden.png');">
+    <div id="scene-garden" class="scene" style="background-image: url('assets/scenes/magic_garden.png');">
         <div id="star-plot" onclick="collectStars()"></div>
         <button id="btn-switch" class="nav-btn" onclick="switchScene('scene-room')">🏠</button>
     </div>
@@ -189,7 +189,7 @@
         if (travelEndTime) {
             if (Date.now() >= travelEndTime) {
                 // 归来逻辑
-                const places = ['assets/scenes/Aurora.png', 'assets/scenes/Egypt.png', 'assets/scenes/LA.png', 'assets/scenes/Paris.png'];
+                const places = ['assets/scenes/Aurora.png', 'assets/scenes/Egypt.png', 'assets/scenes/LA.png', 'assets/scenes/paris.png', 'assets/scenes/world_end.png'];
                 const photo = places[Math.floor(Math.random() * places.length)];
                 album.push(photo);
                 localStorage.setItem('piggy_album', JSON.stringify(album));
