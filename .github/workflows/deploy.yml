@@ -1,18 +1,13 @@
-name: Deploy to GitHub Pages
+name: Deploy Travel Piggy to Pages
 
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:
+    branches: ["main"] # 当你向 main 分支提交代码时触发
 
 permissions:
   contents: read
   pages: write
   id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -23,15 +18,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Setup Pages
-        uses: actions/configure-pages@v5
-
+        uses: actions/configure-pages@v4
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
-
+          path: '.' # 部署根目录下的所有文件
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
