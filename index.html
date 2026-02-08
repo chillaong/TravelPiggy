@@ -55,6 +55,7 @@
 
         /* --- 弹窗通用 --- */
         .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; z-index: 100; backdrop-filter: blur(5px); }
+        #overlay-photo { z-index: 150; }
         .close-btn { position: absolute; top: 20px; right: 20px; font-size: 40px; color: white; cursor: pointer; z-index: 102; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
 
         /* --- 商店面板 --- */
@@ -253,6 +254,7 @@
         setTimeout(() => {
             document.querySelector('.pig-container').style.opacity = '0';
             alert(`小猪带着${name}出发了！`);
+            checkTravelStatus();
         }, 1500);
     }
 
@@ -263,7 +265,7 @@
             finishTravel();
         } else {
             document.querySelector('.pig-container').style.opacity = '0';
-            setTimeout(checkTravelStatus, 1000);
+            setTimeout(checkTravelStatus, 30000);
         }
     }
 
@@ -319,13 +321,11 @@
         const scale = 0.8 + Math.random() * 0.4; 
         pigChar.style.transform = `scale(${scale})`;
         
-        toggleAlbum(false);
         document.getElementById('overlay-photo').style.display = 'block';
     }
 
     function closePhoto() { 
         document.getElementById('overlay-photo').style.display = 'none';
-        toggleAlbum(true);
     }
     function switchScene(id) {
         document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
