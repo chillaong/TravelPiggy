@@ -139,7 +139,6 @@
                 <img class="char" id="p-char" src="assets/characters/pig_selfie.png">
                 <div class="photo-text" id="p-text"></div>
             </div>
-            <p style="text-align:center; color:white; margin-top:20px; font-size:20px; opacity:0.7; cursor:pointer;" onclick="closePhoto()">❌</p>
         </div>
     </div>
 </div>
@@ -253,7 +252,7 @@
         pig.src = 'assets/characters/pig_back.png';
         setTimeout(() => {
             document.querySelector('.pig-container').style.opacity = '0';
-            alert(`小猪出发了！`);
+            alert(`小猪带着${name}出发了！`);
         }, 1500);
     }
 
@@ -324,7 +323,10 @@
         document.getElementById('overlay-photo').style.display = 'block';
     }
 
-    function closePhoto() { document.getElementById('overlay-photo').style.display = 'none'; }
+    function closePhoto() { 
+        document.getElementById('overlay-photo').style.display = 'none';
+        toggleAlbum(true);
+    }
     function switchScene(id) {
         document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
