@@ -19,24 +19,31 @@
 
 ```
 小猪页游素材/
-├── piggy.html              # 主游戏文件
+├── index.html              # 主游戏文件（已重命名）
 ├── assets/                 # 资源文件夹
 │   ├── scenes/            # 场景图片
 │   │   ├── room.png       # 房间背景
-│   │   ├── MagicGarden.png # 魔法花园
-│   │   ├── Aurora.png     # 北极光
-│   │   ├── Egypt.png      # 埃及
-│   │   ├── LA.png         # 洛杉矶
-│   │   ├── Paris.png      # 巴黎
-│   │   └── World End.png  # 世界尽头
+│   │   ├── magic_garden.png # 魔法花园
+│   │   └── postcards/     # 明信片图片
+│   │       ├── Aurora.png     # 北极光
+│   │       ├── Egypt.png      # 埃及
+│   │       ├── LosAngeles.png # 洛杉矶
+│   │       ├── Paris.png      # 巴黎
+│   │       └── Ushuaia.png    # 世界尽头
 │   ├── characters/        # 角色图片
 │   │   ├── pig_idel.png   # 小猪待机状态
 │   │   ├── pig_back.png   # 小猪背影
-│   │   └── pig_travel.png # 小猪旅行状态
-│   └── items/             # 物品图片
-│       └── items.png      # 物品图标集
+│   │   ├── pig_travel.png # 小猪旅行状态
+│   │   └── pig_selfie.png # 小猪自拍状态
+│   ├── items/             # 物品图片
+│   │   └── items.png      # 物品图标集
+│   └── ui/                # UI元素
+│       ├── frame.png      # 相框
+│       └── WorldMap_UI.jpg # 世界地图
 ├── .gitignore             # Git忽略文件
-└── README.md              # 项目说明文档
+├── README.md              # 项目说明文档
+└── .github/workflows/     # GitHub Actions配置
+    └── deploy.yml         # 自动部署配置
 ```
 
 ## 如何运行
@@ -51,28 +58,28 @@ cd /Users/avaswork/Desktop/小猪页游素材
 python3 -m http.server 8000
 
 # 在浏览器中打开
-# http://localhost:8000/piggy.html
+# http://localhost:8000/
 ```
 
 ### 方法二：直接打开
 
-直接在浏览器中打开 `piggy.html` 文件即可。
+直接在浏览器中打开 `index.html` 文件即可。
 
 ## 游戏玩法
 
 1. **收集星星**：切换到花园场景，星星会每10秒自动生成一颗，点击星星收集
 2. **购买食物**：点击左下角背包图标打开商店，用星星购买食物
-3. **喂养小猪**：点击商店中的"喂食"按钮，小猪会带着食物出发旅行
+3. **喂养小猪**：点击商店中的"出发"按钮，小猪会带着食物出发旅行
 4. **等待归来**：小猪旅行时间结束后会自动归来，带回一张明信片
 5. **查看相册**：点击右上角"相册"按钮查看收集的明信片
 
 ## 物品列表
 
 | 物品名称 | 星星消耗 | 旅行时间 |
-|---------|---------|---------|
-| 巧克力 | 5 ⭐ | 1 分钟 |
-| 牛肉汉堡 | 20 ⭐ | 5 分钟 |
-| 无人机 | 40 ⭐ | 10 分钟 |
+|---------|---------|--------|
+| 巧克力 | 5 ⭐ | 0.5 分钟 |
+| 汉堡 | 20 ⭐ | 3 分钟 |
+| 帐篷 | 50 ⭐ | 5 分钟 |
 
 ## 技术栈
 
@@ -80,6 +87,7 @@ python3 -m http.server 8000
 - CSS3 (动画、响应式设计)
 - JavaScript (ES6+)
 - LocalStorage (数据持久化)
+- GitHub Actions (自动部署)
 
 ## 浏览器兼容性
 
@@ -97,6 +105,15 @@ python3 -m http.server 8000
 本项目仅供学习和娱乐使用。
 
 ## 更新日志
+
+- v1.1.0 - 2026-02-08
+  - 优化项目结构，分类整理图片资源
+  - 重命名主文件为index.html
+  - 增大星星元素大小，优化视觉效果
+  - 更新商店物品时间设置：巧克力(0.5分钟)、汉堡(3分钟)、帐篷(5分钟)
+  - 改进相片模态框关闭逻辑，添加专门的关闭按钮
+  - 优化星星收集动画，使飞星特效准确指向星星数量显示区域
+  - 部署到GitHub Pages，配置自动部署 workflow
 
 - v1.0.0 - 初始版本发布
   - 基础游戏功能

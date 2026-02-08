@@ -4,229 +4,351 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>旅行小猪 Travel Piggy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Zhi+Mang+Xing&display=swap" rel="stylesheet">
     <style>
-        :root { --main-bg: #fdf6e3; --accent: #ff9d00; }
-        body { margin: 0; background: #222; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; font-family: "PingFang SC", sans-serif; }
+        :root { --bg-color: #fdf6e3; --accent: #ff9d00; --text-font: 'Zhi Mang Xing', cursive; }
+        body { margin: 0; background: #222; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; font-family: "PingFang SC", sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        /* 9:16 竖屏容器 */
-        #game-view { position: relative; width: 100vw; height: calc(100vw * 16 / 9); max-height: 100vh; max-width: calc(100vh * 9 / 16); background: var(--main-bg); overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
+        /* 9:16 游戏容器 */
+        #game-view { position: relative; width: 100vw; height: calc(100vw * 16 / 9); max-height: 100vh; max-width: calc(100vh * 9 / 16); background: var(--bg-color); overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
         
-        /* 场景管理 */
+        /* 通用场景类 */
         .scene { position: absolute; width: 100%; height: 100%; display: none; background-size: cover; background-position: center; }
         .active { display: block; }
 
-        /* 小猪角色与呼吸动画 */
-        .pig-container { position: absolute; bottom: 2%; left: 50%; transform: translateX(-50%); width: 200px; cursor: pointer; z-index: 5; transition: all 1s ease-in-out; }
-        #pig-img { width: 100%; animation: breathe 3s ease-in-out infinite; }
-        @keyframes breathe { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        /* --- 角色动画 --- */
+        .pig-container { position: absolute; bottom: 3%; left: 50%; transform: translateX(-50%); width: 45%; cursor: pointer; z-index: 10; transition: opacity 0.5s; }
+        #pig-img { width: 100%; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2)); }
+        .breathe { animation: breathe 3s ease-in-out infinite; }
+        @keyframes breathe { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-3%) scale(1.02); } }
 
-        /* 庭院星星区域 */
-        #star-plot { position: absolute; top: 65%; left: 15%; width: 70%; height: 15%; cursor: pointer; z-index: 10; }
-        .star-item { position: absolute; width: 45px; height: 45px; background: url('assets/items/items.png') no-repeat; background-size: 240px; background-position: -10px -10px; animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
-
-        /* UI 元素 */
-        .hud { position: absolute; top: 25px; left: 20px; background: rgba(255,255,255,0.9); padding: 8px 18px; border-radius: 25px; font-weight: bold; font-size: 18px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 50; }
-        .nav-btn { position: absolute; bottom: 25px; width: 65px; height: 65px; background: white; border-radius: 50%; border: 4px solid var(--accent); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 5px 0 #cc7e00; z-index: 50; transition: transform 0.1s; }
-        .nav-btn:active { transform: translateY(4px); box-shadow: none; }
-        #btn-switch { right: 20px; }
-        #btn-bag { left: 20px; }
-
-        /* 背包/商店弹窗 (方案A) */
-        #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        #bag-panel { width: 85%; max-height: 70%; background: #fffcf5; border-radius: 35px; padding: 25px; position: relative; border: 5px solid var(--accent); overflow-y: auto; }
-        .close-btn { position: absolute; top: 15px; right: 25px; font-size: 35px; cursor: pointer; color: #999; }
-        .item-card { display: flex; align-items: center; background: white; margin-bottom: 15px; padding: 12px; border-radius: 20px; border: 2px solid #eee; }
-        .item-icon { width: 50px; height: 50px; background: url('assets/items/items.png') no-repeat; background-size: 200px; margin-right: 15px; }
-        .buy-btn { margin-left: auto; background: var(--accent); color: white; border: none; padding: 8px 15px; border-radius: 15px; font-weight: bold; cursor: pointer; }
+        /* --- 庭院星星系统 (升级版) --- */
+        #star-zone { position: absolute; top: 60%; left: 10%; width: 80%; height: 25%; z-index: 5; pointer-events: none; }
+        .star { 
+            position: absolute; width: 75px; height: 75px; 
+            /* 注意：这里引用了 assets/items/items.png */
+            background: url('assets/items/items.png') no-repeat; 
+            background-size: 590px; background-position: center top; 
+            cursor: pointer; pointer-events: auto;
+            animation: float 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 5px gold);
+        }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         
-        /* 相册页面 */
-        #album-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #fdf6e3; display: none; z-index: 200; overflow-y: auto; padding: 20px; box-sizing: border-box; }
-        .album-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding-top: 50px; }
-        .album-img { width: 100%; border-radius: 10px; border: 5px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        /* 星星飞行动效粒子 */
+        .fly-star { position: absolute; width: 39px; height: 39px; background: gold; border-radius: 50%; pointer-events: none; z-index: 99; transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1); }
+        .float-text { position: absolute; color: #ff9d00; font-weight: bold; font-size: 24px; pointer-events: none; animation: fadeUp 1s forwards; z-index: 100; text-shadow: 0 2px 0 white; }
+        @keyframes fadeUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-50px); } }
+
+        /* --- UI 界面 --- */
+        /* 顶部余额 (改为右上角布局，避让相册按钮) */
+        .hud-balance { position: absolute; top: 25px; left: 20px; background: rgba(255,255,255,0.9); padding: 8px 15px; border-radius: 30px; font-weight: bold; font-size: 18px; display: flex; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 50; }
+        .hud-icon { display: flex; align-items: center; justify-content: center; margin-right: 8px; }
+        
+        /* 相册按钮 */
+        .btn-album { position: absolute; top: 25px; right: 20px; background: white; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 2px solid #ddd; z-index: 50; }
+
+        /* 底部导航 */
+        .nav-bar { position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: space-between; padding: 0 30px; box-sizing: border-box; pointer-events: none; }
+        .nav-btn { pointer-events: auto; width: 70px; height: 70px; background: white; border-radius: 50%; border: 4px solid var(--accent); box-shadow: 0 5px 0 #cc7e00; font-size: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.1s; }
+        .nav-btn:active { transform: translateY(4px); box-shadow: none; }
+
+        /* --- 弹窗通用 --- */
+        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; z-index: 100; backdrop-filter: blur(5px); }
+        .close-btn { position: absolute; top: 20px; right: 20px; font-size: 40px; color: white; cursor: pointer; z-index: 102; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+
+        /* --- 商店面板 --- */
+        #shop-panel { position: absolute; bottom: 0; width: 100%; height: 60%; background: #fffcf5; border-radius: 30px 30px 0 0; padding: 20px; box-sizing: border-box; overflow-y: auto; animation: slideUp 0.3s; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .shop-item { display: flex; align-items: center; background: white; padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 2px solid #eee; }
+        .item-sprite { width: 50px; height: 50px; background: url('assets/items/items.png?v=20260208') no-repeat; background-size: 350px; margin-right: 15px; flex-shrink: 0; }
+        .buy-btn { margin-left: auto; background: var(--accent); color: white; border: none; padding: 8px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; }
+
+        /* --- 世界地图 --- */
+        /* 注意：地图 UI 放在 assets/ui/ 下 */
+        #map-view { width: 100%; height: 100%; background: url('assets/ui/WorldMap_UI.jpg?v=20260208') no-repeat center center; background-size: cover; position: relative; }
+        .map-pin { position: absolute; width: 40px; height: 40px; transform: translate(-50%, -100%); cursor: pointer; }
+        .pin-locked { width: 20px; height: 20px; background: rgba(0,0,0,0.2); border-radius: 50%; border: 2px dashed #666; }
+        /* 解锁的Pin图，复用 items.png 里的图标或 pig 头像 */
+        .pin-unlocked { 
+            width: 50px; height: 50px; 
+            background: url('assets/characters/pig_selfie.png?v=20260208') no-repeat center; 
+            background-size: cover; 
+            border-radius: 50%; border: 3px solid white; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
+            animation: bounce 2s infinite; 
+        }
+        @keyframes bounce { 0%, 100% { transform: translate(-50%, -100%); } 50% { transform: translate(-50%, -110%); } }
+
+        /* --- 拍立得照片详情 --- */
+        #photo-modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; aspect-ratio: 3/4; perspective: 1000px; }
+        .polaroid { position: relative; width: 100%; height: 100%; overflow: visible; transform: rotate(-2deg); box-shadow: 0 20px 50px rgba(0,0,0,0.5); transition: transform 0.3s; }
+        /* 这里的 frame 也在 ui 文件夹 */
+        .polaroid img.frame { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 20; pointer-events: none; }
+        .polaroid img.bg { position: absolute; width: 96%; height: 88%; object-fit: contain; top: 2%; left: 2%; z-index: 1; border-radius: 2px; display: block; }
+        .polaroid img.char { position: absolute; bottom: 25%; right: 10%; width: 45%; height: auto; z-index: 5; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.3)); display: block; }
+        .photo-text { position: absolute; bottom: 5%; width: 100%; text-align: center; font-family: 'Zhi Mang Xing', cursive; font-size: 24px; color: #444; z-index: 30; transform: rotate(2deg); opacity: 0.9; }
+
     </style>
 </head>
 <body>
 
 <div id="game-view">
-    <div id="scene-room" class="scene active" style="background-image: url('assets/scenes/room.png');">
-        <div class="pig-container" id="pig-box" onclick="pigInteractions()">
-            <img id="pig-img" src="assets/characters/pig_idel.png" alt="小猪">
+    <div id="scene-room" class="scene active" style="background-image: url('assets/scenes/room.png?v=20260208');">
+        <div class="pig-container" onclick="interactPig()">
+            <img id="pig-img" src="assets/characters/pig_idel.png?v=20260208" class="breathe" alt="小猪">
         </div>
-        <button id="btn-bag" class="nav-btn" onclick="toggleBag(true)">🎒</button>
-        <button id="btn-switch" class="nav-btn" onclick="switchScene('scene-garden')">🏡</button>
-    </div>
-
-    <div id="scene-garden" class="scene" style="background-image: url('assets/scenes/magic_garden.png');">
-        <div id="star-plot" onclick="collectStars()"></div>
-        <button id="btn-switch" class="nav-btn" onclick="switchScene('scene-room')">🏠</button>
-    </div>
-
-    <div class="hud">⭐ <span id="star-count">20</span></div>
-    <button style="position:absolute; top:25px; right:20px; z-index:50; border-radius:20px; padding:8px;" onclick="toggleAlbum(true)">📷 相册</button>
-
-    <div id="overlay" onclick="toggleBag(false)">
-        <div id="bag-panel" onclick="event.stopPropagation()">
-            <span class="close-btn" onclick="toggleBag(false)">×</span>
-            <h2 style="text-align:center; color: var(--accent);">小猪商店</h2>
-            <div id="shop-list">
-                </div>
+        <div class="nav-bar">
+            <div class="nav-btn" onclick="toggleShop(true)">🎒</div>
+            <div class="nav-btn" onclick="switchScene('scene-garden')">🏡</div>
         </div>
     </div>
 
-    <div id="album-overlay">
-        <span class="close-btn" onclick="toggleAlbum(false)">×</span>
-        <h2 style="text-align:center;">旅行回忆</h2>
-        <div class="album-grid" id="album-list"></div>
+    <div id="scene-garden" class="scene" style="background-image: url('assets/scenes/magic_garden.png?v=20260208');">
+        <div id="star-zone"></div>
+        <div class="nav-bar" style="justify-content: center;">
+            <div class="nav-btn" onclick="switchScene('scene-room')">🏠</div>
+        </div>
+    </div>
+
+    <div class="hud-balance">
+        <div class="hud-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="#FFD700" stroke="#FFA500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span id="star-count">0</span>
+    </div>
+    <div class="btn-album" onclick="toggleAlbum(true)">📷 相册</div>
+
+    <div id="overlay-shop" class="overlay" onclick="toggleShop(false)">
+        <div id="shop-panel" onclick="event.stopPropagation()">
+            <h2 style="text-align:center; color:#555;">准备旅行</h2>
+            <div id="shop-list"></div>
+        </div>
+    </div>
+
+    <div id="overlay-album" class="overlay">
+        <div class="close-btn" onclick="toggleAlbum(false)">×</div>
+        <div id="map-view">
+            </div>
+    </div>
+
+    <div id="overlay-photo" class="overlay" onclick="closePhoto()">
+        <div class="close-btn" onclick="closePhoto()">×</div>
+        <div id="photo-modal" onclick="event.stopPropagation()">
+            <div class="polaroid" id="polaroid-card">
+                <img class="frame" src="assets/ui/frame.png?v=20260208">
+                <img class="bg" id="p-bg" src="">
+                <img class="char" id="p-char" src="assets/characters/pig_selfie.png">
+                <div class="photo-text" id="p-text"></div>
+            </div>
+            <p style="text-align:center; color:white; margin-top:20px; font-size:20px; opacity:0.7; cursor:pointer;" onclick="closePhoto()">❌</p>
+        </div>
     </div>
 </div>
 
 <script>
-    // --- 核心数值配置 ---
-    let stars = 20;
-    let album = JSON.parse(localStorage.getItem('piggy_album')) || [];
-    let travelEndTime = localStorage.getItem('travel_end_time') || null;
+    // --- 核心配置 ---
+    let stars = parseInt(localStorage.getItem('pig_stars')) || 20;
+    let album = JSON.parse(localStorage.getItem('pig_album')) || [];
+    let travelEndTime = localStorage.getItem('pig_travel_end') || null;
 
-    const items = [
-        { id: 'F01', name: '巧克力', cost: 5, time: 1, pos: '-4px -60px' }, // 测试设为1分钟
-        { id: 'F03', name: '牛肉汉堡', cost: 20, time: 5, pos: '-118px -60px' },
-        { id: 'E02', name: '无人机', cost: 40, time: 10, pos: '-118px -155px' }
+    // 地点数据 (注意图片路径统一在 assets/scenes/postcards/)  
+    const locations = [
+        { id: 'LA', name: '洛杉矶', x: 18, y: 35, text: '踩上星光大道啦！✨', img: 'assets/scenes/postcards/LosAngeles.png' },
+        { id: 'Paris', name: '巴黎', x: 48, y: 28, text: '铁塔下的风好温柔～🗼', img: 'assets/scenes/postcards/Paris.png' },
+        { id: 'Egypt', name: '埃及', x: 54, y: 42, text: '金字塔的神秘触手可及🏜️', img: 'assets/scenes/postcards/Egypt.png' },
+        { id: 'Ushuaia', name: '乌斯怀亚', x: 28, y: 82, text: '在世界尽头看冰川❄️', img: 'assets/scenes/postcards/Ushuaia.png' },
+        { id: 'Tasmania', name: '塔斯马尼亚', x: 82, y: 78, text: '南半球的极光看到啦！🌌', img: 'assets/scenes/postcards/Aurora.png' }
     ];
 
-    // --- 初始化游戏 ---
-    window.onload = () => {
-        stars = parseInt(localStorage.getItem('piggy_stars')) || 20;
-        updateUI();
-        renderShop();
-        checkTravelStatus();
-        
-        // 10秒一颗星星
-        setInterval(spawnStar, 10000);
-    };
+    // 道具配置 (基于 items.png)
+    const items = [
+        { name: '巧克力', cost: 5, time: 0.5, pos: '-10px -60px' }, 
+        { name: '汉堡', cost: 20, time: 3, pos: '-130px -60px' },
+        { name: '帐篷', cost: 50, time: 5, pos: '-30px -130px' }
+    ];
 
     function updateUI() {
         document.getElementById('star-count').innerText = stars;
-        localStorage.setItem('piggy_stars', stars);
+        localStorage.setItem('pig_stars', stars);
     }
 
-    // --- 星星逻辑 ---
+    // --- 星星交互 (点击单个) ---
     function spawnStar() {
-        const plot = document.getElementById('star-plot');
-        if (plot.children.length < 6 && !travelEndTime) {
+        const zone = document.getElementById('star-zone');
+        if (zone.children.length < 6 && !travelEndTime) {
             const star = document.createElement('div');
-            star.className = 'star-item';
+            star.className = 'star';
             star.style.left = Math.random() * 80 + '%';
-            star.style.top = Math.random() * 60 + '%';
-            plot.appendChild(star);
+            star.style.top = Math.random() * 70 + '%';
+            star.onclick = (e) => collectOneStar(e, star);
+            zone.appendChild(star);
         }
     }
 
-    function collectStars() {
-        const plot = document.getElementById('star-plot');
-        const count = plot.children.length;
-        if (count > 0) {
-            stars += count;
-            updateUI();
-            plot.innerHTML = '';
-        }
+    function collectOneStar(e, el) {
+        e.stopPropagation();
+        stars += 1;
+        updateUI();
+
+        const gameView = document.getElementById('game-view');
+        const gameRect = gameView.getBoundingClientRect();
+
+        // +1 浮动动画
+        const floatText = document.createElement('div');
+        floatText.className = 'float-text';
+        floatText.innerText = '+1';
+        floatText.style.left = (e.clientX - gameRect.left) + 'px';
+        floatText.style.top = (e.clientY - gameRect.top) + 'px';
+        gameView.appendChild(floatText);
+        setTimeout(() => floatText.remove(), 1000);
+
+        // 模拟飞行动画
+        const flyStar = document.createElement('div');
+        flyStar.className = 'fly-star';
+        flyStar.style.left = (e.clientX - gameRect.left) + 'px';
+        flyStar.style.top = (e.clientY - gameRect.top) + 'px';
+        gameView.appendChild(flyStar);
+        
+        // 飞向左上角余额位置
+        setTimeout(() => {
+            const balanceEl = document.querySelector('.hud-balance');
+            const rect = balanceEl.getBoundingClientRect();
+            
+            flyStar.style.left = (rect.left - gameRect.left + rect.width/2) + 'px';
+            flyStar.style.top = (rect.top - gameRect.top + rect.height/2) + 'px';
+            flyStar.style.opacity = '0';
+        }, 50);
+        setTimeout(() => flyStar.remove(), 800);
+
+        el.remove();
     }
 
-    // --- 场景与UI逻辑 ---
-    function switchScene(id) {
-        document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-    }
-
-    function toggleBag(show) {
-        document.getElementById('overlay').style.display = show ? 'flex' : 'none';
-    }
-
-    function toggleAlbum(show) {
-        const overlay = document.getElementById('album-overlay');
-        overlay.style.display = show ? 'block' : 'none';
-        if (show) renderAlbum();
-    }
-
-    // --- 商店与旅行逻辑 ---
+    // --- 商店与旅行 ---
     function renderShop() {
-        const container = document.getElementById('shop-list');
-        container.innerHTML = items.map(item => `
-            <div class="item-card">
-                <div class="item-icon" style="background-position: ${item.pos}"></div>
+        const list = document.getElementById('shop-list');
+        list.innerHTML = items.map(item => `
+            <div class="shop-item">
+                <div class="item-sprite" style="background-position: ${item.pos}"></div>
                 <div>
-                    <strong>${item.name}</strong><br>
-                    <small>⭐ ${item.cost} / 旅行 ${item.time}min</small>
+                    <div><strong>${item.name}</strong></div>
+                    <div style="font-size:12px; color:#666">⭐ ${item.cost} / ⏳ ${item.time}分</div>
                 </div>
-                <button class="buy-btn" onclick="startTravel('${item.name}', ${item.cost}, ${item.time})">喂食</button>
+                <button class="buy-btn" onclick="buyAndGo('${item.name}', ${item.cost}, ${item.time})">出发</button>
             </div>
         `).join('');
     }
 
-    function startTravel(name, cost, mins) {
-        if (stars < cost) return alert("星星不足！");
-        if (travelEndTime) return alert("小猪还在外面没回来呢~");
-
+    function buyAndGo(name, cost, mins) {
+        if (stars < cost) return alert('星星不够啦！');
+        
         stars -= cost;
         updateUI();
-        
+        toggleShop(false);
+
         const endTime = Date.now() + mins * 60 * 1000;
         travelEndTime = endTime;
-        localStorage.setItem('travel_end_time', endTime);
-        
-        // 切换为背影并消失
-        const pigImg = document.getElementById('pig-img');
-        pigImg.src = 'assets/characters/pig_back.png';
-        setTimeout(() => { document.getElementById('pig-box').style.opacity = '0'; }, 2000);
-        
-        toggleBag(false);
-        alert(`小猪吃饱了，带着${name}出发去旅行啦！`);
+        localStorage.setItem('pig_travel_end', endTime);
+
+        // 切换背影 -> 消失
+        const pig = document.getElementById('pig-img');
+        pig.src = 'assets/characters/pig_back.png';
+        setTimeout(() => {
+            document.querySelector('.pig-container').style.opacity = '0';
+            alert(`小猪出发去${name}了！`);
+        }, 1500);
     }
 
     function checkTravelStatus() {
-        const pigBox = document.getElementById('pig-box');
+        if (!travelEndTime) return;
+
+        if (Date.now() > travelEndTime) {
+            finishTravel();
+        } else {
+            document.querySelector('.pig-container').style.opacity = '0';
+            setTimeout(checkTravelStatus, 1000);
+        }
+    }
+
+    function finishTravel() {
+        const newLoc = locations[Math.floor(Math.random() * locations.length)];
+        
+        if (!album.includes(newLoc.id)) {
+            album.push(newLoc.id);
+            localStorage.setItem('pig_album', JSON.stringify(album));
+        }
+
+        travelEndTime = null;
+        localStorage.removeItem('pig_travel_end');
+        
+        const pigContainer = document.querySelector('.pig-container');
         const pigImg = document.getElementById('pig-img');
+        pigImg.src = 'assets/characters/pig_idel.png';
+        pigContainer.style.opacity = '1';
 
-        if (travelEndTime) {
-            if (Date.now() >= travelEndTime) {
-                // 归来逻辑
-                const places = ['assets/scenes/postcards/Aurora.png', 'assets/scenes/postcards/Egypt.png', 'assets/scenes/postcards/LosAngeles.png', 'assets/scenes/postcards/Paris.png', 'assets/scenes/postcards/Ushuaia.png'];
-                const photo = places[Math.floor(Math.random() * places.length)];
-                album.push(photo);
-                localStorage.setItem('piggy_album', JSON.stringify(album));
-                
-                travelEndTime = null;
-                localStorage.removeItem('travel_end_time');
-                
-                pigBox.style.opacity = '1';
-                pigImg.src = 'assets/characters/pig_idel.png';
-                alert(`🎉 小猪回来啦！带回了明信片：${photo}`);
-            } else {
-                // 仍在旅行
-                pigBox.style.opacity = '0';
+        alert('🎉 小猪回来啦！');
+        showPhoto(newLoc.id);
+        renderMap();
+    }
+
+    // --- 地图与合成 ---
+    function renderMap() {
+        const map = document.getElementById('map-view');
+        map.innerHTML = '';
+        
+        locations.forEach(loc => {
+            const isUnlocked = album.includes(loc.id);
+            const pin = document.createElement('div');
+            pin.className = `map-pin ${isUnlocked ? 'pin-unlocked' : 'pin-locked'}`;
+            pin.style.left = loc.x + '%';
+            pin.style.top = loc.y + '%';
+            
+            if (isUnlocked) {
+                pin.onclick = () => showPhoto(loc.id);
             }
-        }
+            map.appendChild(pin);
+        });
     }
 
-    function pigInteractions() {
+    function showPhoto(locId) {
+        const loc = locations.find(l => l.id === locId);
+        if (!loc) return;
+
+        document.getElementById('p-bg').src = loc.img;
+        document.getElementById('p-text').innerText = loc.text;
+        
+        // 随机构图
+        const pigChar = document.getElementById('p-char');
+        const scale = 0.8 + Math.random() * 0.4; 
+        pigChar.style.transform = `scale(${scale})`;
+        
+        toggleAlbum(false);
+        document.getElementById('overlay-photo').style.display = 'block';
+    }
+
+    function closePhoto() { document.getElementById('overlay-photo').style.display = 'none'; }
+    function switchScene(id) {
+        document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+    function toggleShop(show) { document.getElementById('overlay-shop').style.display = show ? 'block' : 'none'; }
+    function toggleAlbum(show) { 
+        document.getElementById('overlay-album').style.display = show ? 'block' : 'none';
+        if(show) renderMap();
+    }
+    function interactPig() {
         const img = document.getElementById('pig-img');
-        if (img.src.includes('pig_idel.png')) {
+        if(img.src.includes('idel')) {
             img.src = 'assets/characters/pig_travel.png';
-            setTimeout(() => { img.src = 'assets/characters/pig_idel.png'; }, 1500);
+            setTimeout(() => img.src = 'assets/characters/pig_idel.png', 1500);
         }
     }
 
-    function renderAlbum() {
-        const container = document.getElementById('album-list');
-        if (album.length === 0) {
-            container.innerHTML = "<p style='grid-column: 1/3; text-align:center;'>相册空空如也...</p>";
-            return;
-        }
-        container.innerHTML = album.map(img => `<img src="${img}" class="album-img">`).join('');
-    }
-
-    // 每30秒自动检查一次小猪是否归来
-    setInterval(checkTravelStatus, 30000);
+    window.onload = () => {
+        updateUI();
+        renderShop();
+        renderMap();
+        checkTravelStatus();
+        setInterval(spawnStar, 10000); 
+    };
 </script>
-
 </body>
 </html>
