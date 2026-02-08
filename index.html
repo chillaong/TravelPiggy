@@ -189,7 +189,7 @@
         if (travelEndTime) {
             if (Date.now() >= travelEndTime) {
                 // 归来逻辑
-                const places = ['assets/scenes/Aurora.png', 'assets/scenes/Egypt.png', 'assets/scenes/LA.png', 'assets/scenes/paris.png', 'assets/scenes/world_end.png'];
+                const places = ['assets/scenes/postcards/Aurora.png', 'assets/scenes/postcards/Egypt.png', 'assets/scenes/postcards/LosAngeles.png', 'assets/scenes/postcards/Paris.png', 'assets/scenes/postcards/Ushuaia.png'];
                 const photo = places[Math.floor(Math.random() * places.length)];
                 album.push(photo);
                 localStorage.setItem('piggy_album', JSON.stringify(album));
