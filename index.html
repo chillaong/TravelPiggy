@@ -248,14 +248,22 @@
         travelEndTime = endTime;
         localStorage.setItem('pig_travel_end', endTime);
 
-        // 切换背影 -> 消失
+        // 切换背影 -> 渐隐消失
         const pig = document.getElementById('pig-img');
         pig.src = 'assets/characters/pig_back.png';
+        
+        const pigContainer = document.querySelector('.pig-container');
+        pigContainer.style.transition = 'opacity 3s ease-out';
+        pigContainer.style.opacity = '1';
+        
         setTimeout(() => {
-            document.querySelector('.pig-container').style.opacity = '0';
+            pigContainer.style.opacity = '0';
+        }, 100);
+        
+        setTimeout(() => {
             alert(`小猪带着${name}出发了！`);
             checkTravelStatus();
-        }, 1500);
+        }, 3000);
     }
 
     function checkTravelStatus() {
