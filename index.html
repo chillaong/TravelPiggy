@@ -26,9 +26,9 @@
         #star-zone { position: absolute; top: 60%; left: 10%; width: 80%; height: 25%; z-index: 5; pointer-events: none; }
         .star { 
             position: absolute; width: 75px; height: 75px; 
-            /* 注意：这里引用了 assets/items/items.png */
-            background: url('assets/items/items.png') no-repeat; 
-            background-size: 590px; background-position: center top; 
+            /* 使用拆分后的星星图标 */
+            background: url('assets/items/star.png') no-repeat center;
+            background-size: contain; 
             cursor: pointer; pointer-events: auto;
             animation: float 2s ease-in-out infinite;
             filter: drop-shadow(0 0 5px gold);
@@ -62,7 +62,7 @@
         #shop-panel { position: absolute; bottom: 0; width: 100%; height: 60%; background: #fffcf5; border-radius: 30px 30px 0 0; padding: 20px; box-sizing: border-box; overflow-y: auto; animation: slideUp 0.3s; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         .shop-item { display: flex; align-items: center; background: white; padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 2px solid #eee; }
-        .item-sprite { width: 50px; height: 50px; background: url('assets/items/items.png?v=20260208') no-repeat; background-size: 350px; margin-right: 15px; flex-shrink: 0; }
+        .item-sprite { width: 50px; height: 50px; background-repeat: no-repeat; background-position: center; background-size: contain; margin-right: 15px; flex-shrink: 0; }
         .buy-btn { margin-left: auto; background: var(--accent); color: white; border: none; padding: 8px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; }
 
         /* --- 世界地图 --- */
@@ -70,7 +70,7 @@
         #map-view { width: 100%; height: 100%; background: url('assets/ui/WorldMap_UI.jpg?v=20260208') no-repeat center center; background-size: cover; position: relative; }
         .map-pin { position: absolute; width: 40px; height: 40px; transform: translate(-50%, -100%); cursor: pointer; }
         .pin-locked { width: 20px; height: 20px; background: rgba(0,0,0,0.2); border-radius: 50%; border: 2px dashed #666; }
-        /* 解锁的Pin图，复用 items.png 里的图标或 pig 头像 */
+        /* 解锁的 Pin 图，使用 pig 头像 */
         .pin-unlocked { 
             width: 50px; height: 50px; 
             background: url('assets/characters/pig_selfie.png?v=20260208') no-repeat center; 
@@ -146,25 +146,46 @@
 
 <script>
     // --- 核心配置 ---
-    let stars = parseInt(localStorage.getItem('pig_stars')) || 20;
+    let stars = 0;
     let album = JSON.parse(localStorage.getItem('pig_album')) || [];
     let travelEndTime = localStorage.getItem('pig_travel_end') || null;
+    let locations = [];
+    let items = [];
+    let gameConfig = {};
 
-    // 地点数据 (注意图片路径统一在 assets/scenes/postcards/)  
-    const locations = [
-        { id: 'LA', name: '洛杉矶', x: 18, y: 35, text: '踩上星光大道啦！✨', img: 'assets/scenes/postcards/LosAngeles.png' },
-        { id: 'Paris', name: '巴黎', x: 48, y: 28, text: '铁塔下的风好温柔～🗼', img: 'assets/scenes/postcards/Paris.png' },
-        { id: 'Egypt', name: '埃及', x: 54, y: 42, text: '金字塔的神秘触手可及🏜️', img: 'assets/scenes/postcards/Egypt.png' },
-        { id: 'Ushuaia', name: '乌斯怀亚', x: 28, y: 82, text: '在世界尽头看冰川❄️', img: 'assets/scenes/postcards/Ushuaia.png' },
-        { id: 'Tasmania', name: '塔斯马尼亚', x: 82, y: 78, text: '南半球的极光看到啦！🌌', img: 'assets/scenes/postcards/Aurora.png' }
-    ];
+    // --- CSV 加载和解析 ---
+    async function loadCSV(path) {
+        const response = await fetch(path);
+        const text = await response.text();
+        const lines = text.trim().split('\n');
+        const headers = lines[0].split(',').map(h => h.trim());
+        return lines.slice(1).map(line => {
+            const values = line.split(',').map(v => v.trim());
+            return headers.reduce((obj, header, i) => {
+                obj[header] = values[i];
+                return obj;
+            }, {});
+        });
+    }
 
-    // 道具配置 (基于 items.png)
-    const items = [
-        { name: '巧克力', cost: 5, time: 0.5, pos: '-10px -60px' }, 
-        { name: '汉堡', cost: 20, time: 3, pos: '-130px -60px' },
-        { name: '帐篷', cost: 50, time: 5, pos: '-30px -130px' }
-    ];
+    // 加载游戏配置
+    async function loadGameConfig() {
+        const configData = await loadCSV('assets/config/game_config.csv');
+        const config = {};
+        configData.forEach(row => {
+            config[row.key] = isNaN(row.value) ? row.value : parseFloat(row.value);
+        });
+        return config;
+    }
+
+    // 初始化游戏数据
+    async function initGameData() {
+        locations = await loadCSV('assets/config/locations.csv');
+        items = await loadCSV('assets/config/items.csv');
+        gameConfig = await loadGameConfig();
+        
+        stars = parseInt(localStorage.getItem('pig_stars')) || gameConfig.initial_stars;
+    }
 
     function updateUI() {
         document.getElementById('star-count').innerText = stars;
@@ -174,7 +195,7 @@
     // --- 星星交互 (点击单个) ---
     function spawnStar() {
         const zone = document.getElementById('star-zone');
-        if (zone.children.length < 6 && !travelEndTime) {
+        if (zone.children.length < gameConfig.star_max_count && !travelEndTime) {
             const star = document.createElement('div');
             star.className = 'star';
             star.style.left = Math.random() * 80 + '%';
@@ -227,7 +248,7 @@
         const list = document.getElementById('shop-list');
         list.innerHTML = items.map(item => `
             <div class="shop-item">
-                <div class="item-sprite" style="background-position: ${item.pos}"></div>
+                <div class="item-sprite" style="background-image: url('${item.img}')"></div>
                 <div>
                     <div><strong>${item.name}</strong></div>
                     <div style="font-size:12px; color:#666">⭐ ${item.cost} / ⏳ ${item.time}分</div>
@@ -273,7 +294,7 @@
             finishTravel();
         } else {
             document.querySelector('.pig-container').style.opacity = '0';
-            setTimeout(checkTravelStatus, 30000);
+            setTimeout(checkTravelStatus, gameConfig.pig_travel_check_interval);
         }
     }
 
@@ -352,12 +373,14 @@
         }
     }
 
-    window.onload = () => {
+    // --- 初始化游戏 ---
+    window.onload = async () => {
+        await initGameData();
         updateUI();
         renderShop();
         renderMap();
         checkTravelStatus();
-        setInterval(spawnStar, 10000); 
+        setInterval(spawnStar, gameConfig.star_spawn_interval); 
     };
 </script>
 </body>

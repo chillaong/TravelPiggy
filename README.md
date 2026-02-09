@@ -21,29 +21,41 @@
 小猪页游素材/
 ├── index.html              # 主游戏文件（已重命名）
 ├── assets/                 # 资源文件夹
-│   ├── scenes/            # 场景图片
-│   │   ├── room.png       # 房间背景
-│   │   ├── magic_garden.png # 魔法花园
-│   │   └── postcards/     # 明信片图片
-│   │       ├── Aurora.png     # 北极光
-│   │       ├── Egypt.png      # 埃及
-│   │       ├── LosAngeles.png # 洛杉矶
-│   │       ├── Paris.png      # 巴黎
-│   │       └── Ushuaia.png    # 世界尽头
-│   ├── characters/        # 角色图片
-│   │   ├── pig_idel.png   # 小猪待机状态
-│   │   ├── pig_back.png   # 小猪背影
-│   │   ├── pig_travel.png # 小猪旅行状态
-│   │   └── pig_selfie.png # 小猪自拍状态
-│   ├── items/             # 物品图片
-│   │   └── items.png      # 物品图标集
-│   └── ui/                # UI元素
-│       ├── frame.png      # 相框
-│       └── WorldMap_UI.jpg # 世界地图
-├── .gitignore             # Git忽略文件
-├── README.md              # 项目说明文档
-└── .github/workflows/     # GitHub Actions配置
-    └── deploy.yml         # 自动部署配置
+│   ├── scenes/             # 场景图片
+│   │   ├── room.png        # 房间背景
+│   │   ├── magic_garden.png# 魔法花园
+│   │   └── postcards/      # 明信片图片
+│   │       ├── Aurora.png
+│   │       ├── Egypt.png
+│   │       ├── LosAngeles.png
+│   │       ├── Paris.png
+│   │       └── Ushuaia.png
+│   ├── characters/         # 角色图片
+│   │   ├── pig_idel.png
+│   │   ├── pig_back.png
+│   │   ├── pig_travel.png
+│   │   └── pig_selfie.png
+│   ├── items/              # 物品图片（已拆分为单图，兼容原图集）
+│   │   ├── items.png       # （兼容旧引用）
+│   │   ├── star.png
+│   │   ├── chocolate.png
+│   │   ├── granola_bar.png
+│   │   ├── burger.png
+│   │   ├── bento.png
+│   │   ├── tent.png
+│   │   ├── camera.png
+│   │   └── drone.png
+│   ├── ui/                 # UI元素
+│   │   ├── frame.png
+│   │   └── WorldMap_UI.jpg
+│   └── config/             # 运行时可编辑的 CSV 配置
+│       ├── locations.csv   # 地点数据 (id,name,x,y,text,img)
+│       ├── items.csv       # 道具数据 (name,cost,time,img)
+│       └── game_config.csv # 常量配置 (key,value,remark)
+├── .gitignore              # Git忽略文件
+├── README.md               # 项目说明文档
+└── .github/workflows/      # GitHub Actions配置
+  └── deploy.yml          # 自动部署配置
 ```
 
 ## 如何运行
@@ -65,6 +77,8 @@ python3 -m http.server 8000
 
 直接在浏览器中打开 `index.html` 文件即可。
 
+注意：游戏现在从 `assets/config/` 下的 CSV 文件动态加载地点、道具和常量配置，编辑这些 CSV 即可调整游戏数据（无需改代码）。CSV 文件请以 UTF-8 编码保存。
+
 ## 游戏玩法
 
 1. **收集星星**：切换到花园场景，星星会每10秒自动生成一颗，点击星星收集
@@ -76,10 +90,14 @@ python3 -m http.server 8000
 ## 物品列表
 
 | 物品名称 | 星星消耗 | 旅行时间 |
-|---------|---------|--------|
-| 巧克力 | 5 ⭐ | 0.5 分钟 |
-| 汉堡 | 20 ⭐ | 3 分钟 |
-| 帐篷 | 50 ⭐ | 5 分钟 |
+| -------- | -------- | -------- |
+| 巧克力   | 5 ⭐     | 0.5 分钟 |
+| 汉堡     | 20 ⭐    | 3 分钟   |
+| 帐篷     | 50 ⭐    | 5 分钟   |
+| 能量棒   | 8 ⭐     | 1 分钟   |
+| 便当     | 25 ⭐    | 4 分钟   |
+| 相机     | 80 ⭐    | 10 分钟  |
+| 无人机   | 120 ⭐   | 12 分钟  |
 
 ## 技术栈
 
@@ -106,7 +124,14 @@ python3 -m http.server 8000
 
 ## 更新日志
 
+- v1.2.0 - 2026-02-09
+
+  - 将地点、道具和游戏常量抽取为 CSV 配置（assets/config/），支持运行时编辑
+  - 将 items 图集拆分为单独图标（assets/items/*），并将页面改为按单图加载
+  - 更新商店道具：新增能量棒、便当、相机、无人机（并在 `assets/config/items.csv` 中配置）
+  - 改为异步加载配置并在初始化时读取 CSV，移除部分硬编码常量
 - v1.1.0 - 2026-02-08
+
   - 优化项目结构，分类整理图片资源
   - 重命名主文件为index.html
   - 增大星星元素大小，优化视觉效果
@@ -114,8 +139,8 @@ python3 -m http.server 8000
   - 改进相片模态框关闭逻辑，添加专门的关闭按钮
   - 优化星星收集动画，使飞星特效准确指向星星数量显示区域
   - 部署到GitHub Pages，配置自动部署 workflow
-
 - v1.0.0 - 初始版本发布
+
   - 基础游戏功能
   - 房间和花园场景
   - 商店和旅行系统

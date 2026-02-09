@@ -1,0 +1,5 @@
+key,value,remark
+initial_stars,20,初始星星数量
+star_spawn_interval,10000,星星生成间隔(毫秒)
+star_max_count,6,花园内最多星星数
+pig_travel_check_interval,30000,旅行状态检查间隔(毫秒)
