@@ -1,0 +1,32 @@
+key,text
+page_title,旅行小猪 Travel Piggy
+alt_pig,小猪
+alt_star,星星
+alt_shop,猪小铺
+alt_album,冒险日记
+close_btn,×
+shop_title,猪小铺
+backpack_title,🐷猪包
+slot_food_label,食物
+slot_gear_label,装备
+slot_not_selected,未选择
+start_button,出发
+photo_prev,👈
+photo_next,👉
+btn_select,选择
+btn_selected,已选
+btn_buy,购买
+shop_price_time,⭐ {cost} / ⏳ {time}分
+time_label,⏳ {time}分
+float_text_plus_one,+1
+alert_not_enough_stars,星星不够啦！
+alert_buy_success,已购买 {name}，已放入背包！
+alert_no_item,背包里没有这个物品
+alert_item_not_supported,该物品暂不支持出发配置
+alert_travel_ongoing,📷小猪正在旅行中～
+alert_select_food,请先选择 1 个食物
+alert_no_food_in_inventory,背包里没有这个吃的
+alert_travel_started,🎒小猪带着{comboName}出发了
+alert_travel_finished,🎉 小猪回来啦！
+photo_count_prefix,第 
+photo_count_suffix, 次旅行留念

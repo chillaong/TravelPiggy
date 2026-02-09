@@ -1,8 +1,8 @@
 name,cost,time,img
 巧克力,5,0.5,assets/items/chocolate.png
 汉堡,20,3,assets/items/burger.png
-帐篷,50,5,assets/items/tent.png
+帐篷,30,5,assets/items/tent.png
 能量棒,8,1,assets/items/granola_bar.png
-便当,25,4,assets/items/bento.png
-相机,80,10,assets/items/camera.png
-无人机,120,12,assets/items/drone.png
+便当,20,3,assets/items/bento.png
+相机,50,8,assets/items/camera.png
+无人机,80,10,assets/items/drone.png

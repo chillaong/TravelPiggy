@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>旅行小猪 Travel Piggy</title>
+    <title></title>
     <link href="https://fonts.googleapis.com/css2?family=Zhi+Mang+Xing&display=swap" rel="stylesheet">
     <style>
         :root { --bg-color: #fdf6e3; --accent: #ff9d00; --text-font: 'Zhi Mang Xing', cursive; }
@@ -18,6 +18,8 @@
 
         /* --- 角色动画 --- */
         .pig-container { position: absolute; bottom: 3%; left: 50%; transform: translateX(-50%); width: 45%; cursor: pointer; z-index: 10; transition: opacity 0.5s; }
+        /* Prevent initial flash when page loads during travel */
+        .traveling .pig-container { opacity: 0; transition: none; }
         #pig-img { width: 100%; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2)); }
         .breathe { animation: breathe 3s ease-in-out infinite; }
         @keyframes breathe { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-3%) scale(1.02); } }
@@ -25,9 +27,9 @@
         /* --- 庭院星星系统 (升级版) --- */
         #star-zone { position: absolute; top: 60%; left: 10%; width: 80%; height: 25%; z-index: 5; pointer-events: none; }
         .star { 
-            position: absolute; width: 75px; height: 75px; 
-            /* 使用拆分后的星星图标 */
-            background: url('assets/items/star.png') no-repeat center;
+            position: absolute; width: 50px; height: 50px; 
+            /* 使用新的星星图标，尺寸更小更协调 */
+            background: url('assets/ui/stars.png') no-repeat center;
             background-size: contain; 
             cursor: pointer; pointer-events: auto;
             animation: float 2s ease-in-out infinite;
@@ -44,13 +46,22 @@
         /* 顶部余额 (改为右上角布局，避让相册按钮) */
         .hud-balance { position: absolute; top: 25px; left: 20px; background: rgba(255,255,255,0.9); padding: 8px 15px; border-radius: 30px; font-weight: bold; font-size: 18px; display: flex; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 50; }
         .hud-icon { display: flex; align-items: center; justify-content: center; margin-right: 8px; }
+        /* 维持白色底框原本高度，用缩放放大内部图标 */
+        .hud-icon img { width: 28px; height: 28px; display: block; transform: scale(1.4); transform-origin: center; }
+        /* 商店 & 相册图标基准同为 28px，但缩放比例不同：相册略大一些 */
+        .btn-shop img { width: 28px; height: 28px; display: block; transform: scale(1.6); transform-origin: center; }
+        .btn-album img { width: 28px; height: 28px; display: block; transform: scale(2.0); transform-origin: center; }
         
         /* 相册按钮 */
-        .btn-album { position: absolute; top: 25px; right: 20px; background: white; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 2px solid #ddd; z-index: 50; }
+        .btn-album { position: absolute; top: 25px; right: 20px; background: white; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 2px solid #ddd; z-index: 50; display: flex; align-items: center; justify-content: center; }
+
+        /* 商店按钮 (左上角星星下方) */
+        .btn-shop { position: absolute; top: 78px; left: 20px; background: white; padding: 6px 12px; border-radius: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 2px solid #ddd; z-index: 50; display: flex; align-items: center; gap: 6px; }
 
         /* 底部导航 */
         .nav-bar { position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: space-between; padding: 0 30px; box-sizing: border-box; pointer-events: none; }
-        .nav-btn { pointer-events: auto; width: 70px; height: 70px; background: white; border-radius: 50%; border: 4px solid var(--accent); box-shadow: 0 5px 0 #cc7e00; font-size: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.1s; }
+        /* 底部橙色圆形按钮（背包 / 切换庭院卧室），统一稍微缩小一点 */
+        .nav-btn { pointer-events: auto; width: 60px; height: 60px; background: white; border-radius: 50%; border: 4px solid var(--accent); box-shadow: 0 4px 0 #cc7e00; font-size: 26px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.1s; }
         .nav-btn:active { transform: translateY(4px); box-shadow: none; }
 
         /* --- 弹窗通用 --- */
@@ -64,6 +75,17 @@
         .shop-item { display: flex; align-items: center; background: white; padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 2px solid #eee; }
         .item-sprite { width: 50px; height: 50px; background-repeat: no-repeat; background-position: center; background-size: contain; margin-right: 15px; flex-shrink: 0; }
         .buy-btn { margin-left: auto; background: var(--accent); color: white; border: none; padding: 8px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; }
+        .buy-btn:disabled { background: #bbb; cursor: not-allowed; }
+
+        /* --- 背包面板 --- */
+        #backpack-panel { position: absolute; bottom: 0; width: 100%; height: 60%; background: #fffcf5; border-radius: 30px 30px 0 0; padding: 20px; box-sizing: border-box; overflow-y: auto; animation: slideUp 0.3s; }
+        .backpack-slots { display: flex; gap: 10px; margin-bottom: 12px; }
+        .backpack-slot { flex: 1; background: #fff; border: 2px dashed #ddd; border-radius: 12px; padding: 8px 10px; font-size: 14px; color: #666; min-height: 40px; display: flex; align-items: center; }
+        .count-badge { background: #ffe1b0; color: #7a4a00; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 8px; }
+        .select-btn { margin-left: auto; background: #ffd166; color: #6b3e00; border: none; padding: 6px 14px; border-radius: 16px; font-weight: bold; cursor: pointer; }
+        .select-btn:disabled { background: #bbb; cursor: not-allowed; }
+        .start-btn { width: 100%; background: #7fbf4d; color: white; border: none; padding: 10px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; margin-top: 8px; }
+        .start-btn:disabled { background: #bbb; cursor: not-allowed; }
 
         /* --- 世界地图 --- */
         /* 注意：地图 UI 放在 assets/ui/ 下 */
@@ -88,19 +110,27 @@
         .polaroid img.frame { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 20; pointer-events: none; }
         .polaroid img.bg { position: absolute; width: 96%; height: 88%; object-fit: contain; top: 2%; left: 2%; z-index: 1; border-radius: 2px; display: block; }
         .polaroid img.char { position: absolute; bottom: 25%; right: 10%; width: 45%; height: auto; z-index: 5; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.3)); display: block; }
-        .photo-text { position: absolute; bottom: 5%; width: 100%; text-align: center; font-family: 'Zhi Mang Xing', cursive; font-size: 24px; color: #444; z-index: 30; transform: rotate(2deg); opacity: 0.9; }
+        .photo-text { position: absolute; bottom: 5%; width: 100%; text-align: center; font-family: 'Zhi Mang Xing', cursive; font-size: 30px; color: #444; z-index: 30; transform: rotate(2deg); opacity: 0.9; }
 
     </style>
+        <script>
+            try {
+                const end = Number(localStorage.getItem('pig_travel_end')) || 0;
+                if (end && Date.now() <= end) {
+                    document.documentElement.classList.add('traveling');
+                }
+            } catch (e) {}
+        </script>
 </head>
 <body>
 
 <div id="game-view">
     <div id="scene-room" class="scene active" style="background-image: url('assets/scenes/room.png?v=20260208');">
         <div class="pig-container" onclick="interactPig()">
-            <img id="pig-img" src="assets/characters/pig_idel.png?v=20260208" class="breathe" alt="小猪">
+            <img id="pig-img" src="assets/characters/pig_idel.png?v=20260208" class="breathe" alt="">
         </div>
         <div class="nav-bar">
-            <div class="nav-btn" onclick="toggleShop(true)">🎒</div>
+            <div class="nav-btn" onclick="toggleBackpack(true)">🎒</div>
             <div class="nav-btn" onclick="switchScene('scene-garden')">🏡</div>
         </div>
     </div>
@@ -113,26 +143,39 @@
     </div>
 
     <div class="hud-balance">
-        <div class="hud-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="#FFD700" stroke="#FFA500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="hud-icon"><img src="assets/ui/stars.png" alt=""></div>
         <span id="star-count">0</span>
     </div>
-    <div class="btn-album" onclick="toggleAlbum(true)">📷 相册</div>
+    <div class="btn-shop" onclick="toggleShop(true)"><img src="assets/ui/stores.png" alt=""></div>
+    <div class="btn-album" onclick="toggleAlbum(true)"><img src="assets/ui/diary.png" alt=""></div>
 
     <div id="overlay-shop" class="overlay" onclick="toggleShop(false)">
         <div id="shop-panel" onclick="event.stopPropagation()">
-            <h2 style="text-align:center; color:#555;">准备旅行</h2>
+            <h2 id="shop-title" style="text-align:center; color:#555;"></h2>
             <div id="shop-list"></div>
         </div>
     </div>
 
+    <div id="overlay-backpack" class="overlay" onclick="toggleBackpack(false)">
+        <div id="backpack-panel" onclick="event.stopPropagation()">
+            <h2 id="backpack-title" style="text-align:center; color:#555;"></h2>
+            <div class="backpack-slots">
+                <div class="backpack-slot" id="slot-food"></div>
+                <div class="backpack-slot" id="slot-gear"></div>
+            </div>
+            <div id="backpack-list"></div>
+            <button class="start-btn" id="start-travel-btn" onclick="startTravelFromSelection()"></button>
+        </div>
+    </div>
+
     <div id="overlay-album" class="overlay">
-        <div class="close-btn" onclick="toggleAlbum(false)">×</div>
+        <div class="close-btn" onclick="toggleAlbum(false)"></div>
         <div id="map-view">
             </div>
     </div>
 
     <div id="overlay-photo" class="overlay" onclick="closePhoto()">
-        <div class="close-btn" onclick="closePhoto()">×</div>
+        <div class="close-btn" onclick="closePhoto()"></div>
         <div id="photo-modal" onclick="event.stopPropagation()">
             <div class="polaroid" id="polaroid-card">
                 <img class="frame" src="assets/ui/frame.png?v=20260208">
@@ -140,6 +183,8 @@
                 <img class="char" id="p-char" src="assets/characters/pig_selfie.png">
                 <div class="photo-text" id="p-text"></div>
             </div>
+            <button id="photo-prev" style="position:absolute; left:-10px; top:50%; transform:translateY(-50%); background:#fff; border:2px solid #ddd; border-radius:20px; padding:6px 10px; cursor:pointer;"></button>
+            <button id="photo-next" style="position:absolute; right:-10px; top:50%; transform:translateY(-50%); background:#fff; border:2px solid #ddd; border-radius:20px; padding:6px 10px; cursor:pointer;"></button>
         </div>
     </div>
 </div>
@@ -152,20 +197,89 @@
     let locations = [];
     let items = [];
     let gameConfig = {};
+    let uiText = {};
+    let inventory = {};
+    let albumRecords = JSON.parse(localStorage.getItem('pig_album_records')) || null;
+    let travelPayload = JSON.parse(localStorage.getItem('pig_travel_payload')) || null;
+    let selectedFoodName = null;
+    let selectedGearName = null;
 
     // --- CSV 加载和解析 ---
-    async function loadCSV(path) {
-        const response = await fetch(path);
-        const text = await response.text();
-        const lines = text.trim().split('\n');
-        const headers = lines[0].split(',').map(h => h.trim());
-        return lines.slice(1).map(line => {
-            const values = line.split(',').map(v => v.trim());
-            return headers.reduce((obj, header, i) => {
-                obj[header] = values[i];
+    function parseCSV(text) {
+        const rows = [];
+        let row = [];
+        let cell = '';
+        let inQuotes = false;
+
+        for (let i = 0; i < text.length; i++) {
+            const ch = text[i];
+            if (inQuotes) {
+                if (ch === '"') {
+                    if (text[i + 1] === '"') {
+                        cell += '"';
+                        i++;
+                    } else {
+                        inQuotes = false;
+                    }
+                } else {
+                    cell += ch;
+                }
+            } else {
+                if (ch === '"') {
+                    inQuotes = true;
+                } else if (ch === ',') {
+                    row.push(cell);
+                    cell = '';
+                } else if (ch === '\n') {
+                    row.push(cell);
+                    rows.push(row);
+                    row = [];
+                    cell = '';
+                } else if (ch !== '\r') {
+                    cell += ch;
+                }
+            }
+        }
+
+        if (cell.length || row.length) {
+            row.push(cell);
+            rows.push(row);
+        }
+
+        const headers = (rows.shift() || []).map(h => h.trim());
+        return rows
+            .filter(r => r.some(c => c.trim() !== ''))
+            .map(r => {
+                const obj = {};
+                headers.forEach((h, idx) => {
+                    obj[h] = (r[idx] || '').trim();
+                });
                 return obj;
-            }, {});
+            });
+    }
+
+    async function loadCSV(path) {
+        const response = await fetch(path, { cache: 'no-store' });
+        const text = await response.text();
+        return parseCSV(text);
+    }
+
+    async function loadUIText() {
+        const rows = await loadCSV('assets/config/ui_text.csv');
+        const dict = {};
+        rows.forEach(row => {
+            if (row.key) {
+                dict[row.key] = row.text || '';
+            }
         });
+        return dict;
+    }
+
+    function t(key, fallback = '') {
+        if (uiText && Object.prototype.hasOwnProperty.call(uiText, key)) {
+            return uiText[key] || fallback;
+        }
+        return fallback;
     }
 
     // 加载游戏配置
@@ -180,16 +294,123 @@
 
     // 初始化游戏数据
     async function initGameData() {
-        locations = await loadCSV('assets/config/locations.csv');
-        items = await loadCSV('assets/config/items.csv');
+        const rawLocations = await loadCSV('assets/config/locations.csv');
+        const rawItems = await loadCSV('assets/config/items.csv');
         gameConfig = await loadGameConfig();
+        uiText = await loadUIText();
         
+        const defaults = {
+            initial_stars: 20,
+            star_max_count: 6,
+            pig_travel_check_interval: 30000,
+            star_refresh_rate: 10000,
+            weighted_prob: 0.9,
+            stars_per_second: 0
+        };
+        gameConfig = { ...defaults, ...gameConfig };
+
+        items = rawItems.map(item => ({
+            name: item.name,
+            cost: Number(item.cost) || 0,
+            time: Number(item.time) || 0,
+            img: item.img,
+            tier: Number(item.tier) || 0,
+            type: item.type,
+            effect: item.effect,
+            stock: Number(item.stock) || 0
+        }));
+
+        locations = rawLocations.map(loc => ({
+            id: loc.id,
+            name: loc.name,
+            x: Number(loc.x) || 0,
+            y: Number(loc.y) || 0,
+            tier: Number(loc.tier) || 0,
+            img: loc.img,
+            img_B: loc.img_B,
+            text1: loc.text1,
+            text2: loc.text2,
+            text3: loc.text3
+        }));
+
+        if (!albumRecords || !Array.isArray(albumRecords)) {
+            const legacyAlbum = JSON.parse(localStorage.getItem('pig_album')) || [];
+            albumRecords = legacyAlbum
+                .map(id => {
+                    const loc = locations.find(entry => entry.id === id);
+                    if (!loc) return null;
+                    return {
+                        locationId: id,
+                        angle: 'A',
+                        img: loc.img,
+                        text: loc.text1 || '',
+                        count: 1,
+                        stamp: false
+                    };
+                })
+                .filter(Boolean);
+            localStorage.setItem('pig_album_records', JSON.stringify(albumRecords));
+        }
+
         stars = parseInt(localStorage.getItem('pig_stars')) || gameConfig.initial_stars;
+        loadInventory();
+    }
+
+    function applyUIText() {
+        document.title = t('page_title', document.title || '');
+
+        const pigImg = document.getElementById('pig-img');
+        if (pigImg) pigImg.alt = t('alt_pig', '');
+
+        const starIcon = document.querySelector('.hud-icon img');
+        if (starIcon) starIcon.alt = t('alt_star', '');
+
+        const shopIcon = document.querySelector('.btn-shop img');
+        if (shopIcon) shopIcon.alt = t('alt_shop', '');
+
+        const albumIcon = document.querySelector('.btn-album img');
+        if (albumIcon) albumIcon.alt = t('alt_album', '');
+
+        document.querySelectorAll('.close-btn').forEach(btn => {
+            btn.textContent = t('close_btn', '');
+        });
+
+        const shopTitle = document.getElementById('shop-title');
+        if (shopTitle) shopTitle.innerText = t('shop_title', '');
+
+        const backpackTitle = document.getElementById('backpack-title');
+        if (backpackTitle) backpackTitle.innerText = t('backpack_title', '');
+
+        const slotFood = document.getElementById('slot-food');
+        const slotGear = document.getElementById('slot-gear');
+        if (slotFood) slotFood.textContent = `${t('slot_food_label', '')}：${t('slot_not_selected', '')}`;
+        if (slotGear) slotGear.textContent = `${t('slot_gear_label', '')}：${t('slot_not_selected', '')}`;
+
+        const startBtn = document.getElementById('start-travel-btn');
+        if (startBtn) startBtn.textContent = t('start_button', '');
+
+        const btnPrev = document.getElementById('photo-prev');
+        const btnNext = document.getElementById('photo-next');
+        if (btnPrev) btnPrev.textContent = t('photo_prev', '');
+        if (btnNext) btnNext.textContent = t('photo_next', '');
     }
 
     function updateUI() {
         document.getElementById('star-count').innerText = stars;
         localStorage.setItem('pig_stars', stars);
+    }
+
+    function loadInventory() {
+        const raw = JSON.parse(localStorage.getItem('pig_inventory')) || {};
+        inventory = items.reduce((acc, item) => {
+            const stored = parseInt(raw[item.name], 10);
+            acc[item.name] = Number.isNaN(stored) ? item.stock : stored;
+            return acc;
+        }, {});
+    }
+
+    function saveInventory() {
+        localStorage.setItem('pig_inventory', JSON.stringify(inventory));
     }
 
     // --- 星星交互 (点击单个) ---
@@ -216,7 +437,7 @@
         // +1 浮动动画
         const floatText = document.createElement('div');
         floatText.className = 'float-text';
-        floatText.innerText = '+1';
+        floatText.innerText = t('float_text_plus_one', '');
         floatText.style.left = (e.clientX - gameRect.left) + 'px';
         floatText.style.top = (e.clientY - gameRect.top) + 'px';
         gameView.appendChild(floatText);
@@ -246,28 +467,145 @@
     // --- 商店与旅行 ---
     function renderShop() {
         const list = document.getElementById('shop-list');
+        const priceTimeTemplate = t('shop_price_time', '');
         list.innerHTML = items.map(item => `
             <div class="shop-item">
                 <div class="item-sprite" style="background-image: url('${item.img}')"></div>
                 <div>
                     <div><strong>${item.name}</strong></div>
-                    <div style="font-size:12px; color:#666">⭐ ${item.cost} / ⏳ ${item.time}分</div>
+                    <div style="font-size:12px; color:#666">${priceTimeTemplate.replace('{cost}', item.cost).replace('{time}', item.time)}</div>
                 </div>
-                <button class="buy-btn" onclick="buyAndGo('${item.name}', ${item.cost}, ${item.time})">出发</button>
+                <button class="buy-btn" onclick="buyItem('${item.name}', ${item.cost})">${t('btn_buy', '')}</button>
             </div>
         `).join('');
     }
 
-    function buyAndGo(name, cost, mins) {
-        if (stars < cost) return alert('星星不够啦！');
-        
+    function renderBackpack() {
+        const list = document.getElementById('backpack-list');
+        const slotFood = document.getElementById('slot-food');
+        const slotGear = document.getElementById('slot-gear');
+        const startBtn = document.getElementById('start-travel-btn');
+        const selectedFood = items.find(item => item.name === selectedFoodName);
+        const selectedGear = items.find(item => item.name === selectedGearName);
+
+        const foodLabel = t('slot_food_label', '');
+        const gearLabel = t('slot_gear_label', '');
+        const notSelectedLabel = t('slot_not_selected', '');
+
+        slotFood.textContent = `${foodLabel}：${selectedFood ? selectedFood.name : notSelectedLabel}`;
+        slotGear.textContent = `${gearLabel}：${selectedGear ? selectedGear.name : notSelectedLabel}`;
+
+        const canStart = !!selectedFoodName && !travelEndTime;
+        startBtn.disabled = !canStart;
+
+        list.innerHTML = items.map(item => {
+            const count = inventory[item.name] || 0;
+            const disabled = count === 0 || travelEndTime;
+            const isSelected = item.name === selectedFoodName || item.name === selectedGearName;
+            const btnLabel = isSelected ? t('btn_selected', '') : t('btn_select', '');
+            const timeLabel = t('time_label', '').replace('{time}', item.time);
+            return `
+                <div class="shop-item">
+                    <div class="item-sprite" style="background-image: url('${item.img}')"></div>
+                    <div>
+                        <div><strong>${item.name}</strong><span class="count-badge">x${count}</span></div>
+                        <div style="font-size:12px; color:#666">${timeLabel}</div>
+                    </div>
+                    <button class="select-btn" onclick="selectBackpackItem('${item.name}')" ${disabled ? 'disabled' : ''}>${btnLabel}</button>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function buyItem(name, cost) {
+        if (stars < cost) return alert(t('alert_not_enough_stars', ''));
         stars -= cost;
         updateUI();
-        toggleShop(false);
+        inventory[name] = (inventory[name] || 0) + 1;
+        saveInventory();
+        renderBackpack();
+        alert(t('alert_buy_success', '').replace('{name}', name));
+    }
 
-        const endTime = Date.now() + mins * 60 * 1000;
+    function selectBackpackItem(name) {
+        if (travelEndTime) return;
+        if (!inventory[name]) return alert(t('alert_no_item', ''));
+
+        const item = items.find(entry => entry.name === name);
+        if (!item) return;
+
+        if (item.type === 'food') {
+            selectedFoodName = name;
+        } else if (item.type === 'gear') {
+            selectedGearName = name;
+        } else {
+            // Fallback: allow any item to be used as a travel item
+            selectedFoodName = name;
+        }
+
+        renderBackpack();
+    }
+
+    function startTravelFromSelection() {
+        if (travelEndTime) return alert(t('alert_travel_ongoing', ''));
+
+        const chosenName = selectedFoodName || selectedGearName;
+        if (!chosenName) return alert(t('alert_select_food', ''));
+        if (selectedFoodName && !inventory[selectedFoodName]) return alert(t('alert_no_food_in_inventory', ''));
+        if (selectedGearName && !inventory[selectedGearName]) return alert(t('alert_no_item', ''));
+
+        if (selectedFoodName) {
+            inventory[selectedFoodName] -= 1;
+        }
+        if (selectedGearName) {
+            inventory[selectedGearName] -= 1;
+        }
+        saveInventory();
+        renderBackpack();
+        toggleBackpack(false);
+
+        const foodItem = items.find(item => item.name === selectedFoodName);
+        const gearItem = items.find(item => item.name === selectedGearName);
+        const travelItem = foodItem || gearItem;
+
+        if (!travelItem) return;
+
+        selectedFoodName = null;
+        selectedGearName = null;
+
+        beginTravel(travelItem, gearItem);
+    }
+
+    function pickTravelLocation(tier) {
+        const weighted = Number(gameConfig.weighted_prob) || 0.9;
+        if (tier === 1) {
+            const tier1 = locations.filter(loc => loc.tier === 1);
+            return tier1.length ? tier1 : locations;
+        }
+
+        const roll = Math.random();
+        const primary = locations.filter(loc => loc.tier === tier);
+        const fallback = locations.filter(loc => loc.tier === 1);
+
+        if (roll <= weighted && primary.length) return primary;
+        if (fallback.length) return fallback;
+        return primary.length ? primary : locations;
+    }
+
+    function beginTravel(travelItem, gearItem) {
+        const endTime = Date.now() + travelItem.time * 60 * 1000;
         travelEndTime = endTime;
         localStorage.setItem('pig_travel_end', endTime);
+
+        const candidateList = pickTravelLocation(travelItem.tier);
+        const chosen = candidateList[Math.floor(Math.random() * candidateList.length)];
+        travelPayload = {
+            locationId: chosen.id,
+            foodName: travelItem.name,
+            gearName: gearItem ? gearItem.name : '',
+            gearEffect: gearItem ? gearItem.effect : 'none'
+        };
+        localStorage.setItem('pig_travel_payload', JSON.stringify(travelPayload));
 
         // 切换背影 -> 渐隐消失
         const pig = document.getElementById('pig-img');
@@ -281,8 +619,10 @@
             pigContainer.style.opacity = '0';
         }, 100);
         
+        const comboName = gearItem ? `${travelItem.name} + ${gearItem.name}` : travelItem.name;
+
         setTimeout(() => {
-            alert(`小猪带着${name}出发了！`);
+            alert(t('alert_travel_started', '').replace('{comboName}', comboName));
             checkTravelStatus();
         }, 3000);
     }
@@ -293,18 +633,49 @@
         if (Date.now() > travelEndTime) {
             finishTravel();
         } else {
-            document.querySelector('.pig-container').style.opacity = '0';
+            const pigContainer = document.querySelector('.pig-container');
+            // Avoid a fade-in flash after refresh while traveling
+            pigContainer.style.transition = 'none';
+            pigContainer.style.opacity = '0';
             setTimeout(checkTravelStatus, gameConfig.pig_travel_check_interval);
         }
     }
 
     function finishTravel() {
-        const newLoc = locations[Math.floor(Math.random() * locations.length)];
-        
-        if (!album.includes(newLoc.id)) {
-            album.push(newLoc.id);
-            localStorage.setItem('pig_album', JSON.stringify(album));
+        const targetId = travelPayload?.locationId;
+        const newLoc = locations.find(loc => loc.id === targetId) || locations[Math.floor(Math.random() * locations.length)];
+        const textOptions = [newLoc.text1, newLoc.text2, newLoc.text3].filter(Boolean);
+        const lockedText = textOptions.length ? textOptions[Math.floor(Math.random() * textOptions.length)] : '';
+
+        const applyStamp = travelPayload?.gearEffect === 'stamp';
+        const applyDouble = travelPayload?.gearEffect === 'double';
+
+        const updateRecord = (angle) => {
+            const existing = albumRecords.find(record => record.locationId === newLoc.id && record.angle === angle);
+            if (existing) {
+                existing.count += 1;
+                existing.stamp = existing.stamp || applyStamp;
+            } else {
+                albumRecords.push({
+                    locationId: newLoc.id,
+                    angle,
+                    text: lockedText,
+                    count: 1,
+                    stamp: applyStamp
+                });
+            }
+        };
+
+        if (!Array.isArray(albumRecords)) {
+            albumRecords = [];
         }
+
+        updateRecord('A');
+        if (applyDouble && newLoc.img_B) {
+            updateRecord('B');
+        }
+
+        localStorage.setItem('pig_album_records', JSON.stringify(albumRecords));
 
         travelEndTime = null;
         localStorage.removeItem('pig_travel_end');
@@ -314,9 +685,13 @@
         pigImg.src = 'assets/characters/pig_idel.png';
         pigContainer.style.opacity = '1';
 
-        alert('🎉 小猪回来啦！');
-        showPhoto(newLoc.id);
+        travelPayload = null;
+        localStorage.removeItem('pig_travel_payload');
+
+        alert(t('alert_travel_finished', ''));
+        showPhoto(newLoc.id, 'A');
         renderMap();
+        renderBackpack();
     }
 
     // --- 地图与合成 ---
@@ -325,26 +700,70 @@
         map.innerHTML = '';
         
         locations.forEach(loc => {
-            const isUnlocked = album.includes(loc.id);
+            const isUnlocked = albumRecords.some(record => record.locationId === loc.id);
             const pin = document.createElement('div');
             pin.className = `map-pin ${isUnlocked ? 'pin-unlocked' : 'pin-locked'}`;
             pin.style.left = loc.x + '%';
             pin.style.top = loc.y + '%';
             
             if (isUnlocked) {
-                pin.onclick = () => showPhoto(loc.id);
+                pin.onclick = () => showPhoto(loc.id, 'A');
             }
             map.appendChild(pin);
         });
     }
 
-    function showPhoto(locId) {
-        const loc = locations.find(l => l.id === locId);
-        if (!loc) return;
+    function showPhoto(locId, angle) {
+        const records = albumRecords.filter(record => record.locationId === locId);
+        if (!records.length) return;
 
-        document.getElementById('p-bg').src = loc.img;
-        document.getElementById('p-text').innerText = loc.text;
-        
+        const targetAngle = angle || (records.some(r => r.angle === 'A') ? 'A' : records[0].angle);
+        const record = records.find(r => r.angle === targetAngle) || records[0];
+        const loc = locations.find(entry => entry.id === locId);
+        const pBg = document.getElementById('p-bg');
+        const pText = document.getElementById('p-text');
+        const stampEl = document.getElementById('p-stamp');
+        const btnPrev = document.getElementById('photo-prev');
+        const btnNext = document.getElementById('photo-next');
+
+        if (loc) {
+            if (targetAngle === 'B' && loc.img_B) {
+                pBg.src = loc.img_B;
+            } else {
+                pBg.src = loc.img;
+            }
+        } else {
+            pBg.src = record.img || '';
+        }
+        pText.innerText = record.text || '';
+
+        if (record.stamp) {
+            if (!stampEl) {
+                const stamp = document.createElement('img');
+                stamp.id = 'p-stamp';
+                stamp.src = 'assets/ui/camera_stamp.png';
+                stamp.style.position = 'absolute';
+                stamp.style.right = '8%';
+                stamp.style.top = '8%';
+                stamp.style.width = '30%';
+                stamp.style.transform = 'rotate(-8deg)';
+                stamp.style.zIndex = '25';
+                document.getElementById('polaroid-card').appendChild(stamp);
+            }
+        } else if (stampEl) {
+            stampEl.remove();
+        }
+
+        const hasA = records.some(r => r.angle === 'A');
+        const hasB = records.some(r => r.angle === 'B');
+        if (btnPrev && btnNext) {
+            const showToggle = hasA && hasB;
+            btnPrev.style.display = showToggle ? 'block' : 'none';
+            btnNext.style.display = showToggle ? 'block' : 'none';
+            btnPrev.onclick = () => showPhoto(locId, 'A');
+            btnNext.onclick = () => showPhoto(locId, 'B');
+        }
+
         // 随机构图
         const pigChar = document.getElementById('p-char');
         const scale = 0.8 + Math.random() * 0.4; 
@@ -361,6 +780,10 @@
         document.getElementById(id).classList.add('active');
     }
     function toggleShop(show) { document.getElementById('overlay-shop').style.display = show ? 'block' : 'none'; }
+    function toggleBackpack(show) { 
+        document.getElementById('overlay-backpack').style.display = show ? 'block' : 'none';
+        if (show) renderBackpack();
+    }
     function toggleAlbum(show) { 
         document.getElementById('overlay-album').style.display = show ? 'block' : 'none';
         if(show) renderMap();
@@ -373,14 +796,38 @@
         }
     }
 
+    function applyTravelVisualState() {
+        const pigContainer = document.querySelector('.pig-container');
+        const pigImg = document.getElementById('pig-img');
+        const root = document.documentElement;
+
+        if (travelEndTime && Date.now() <= travelEndTime) {
+            root.classList.add('traveling');
+            pigImg.src = 'assets/characters/pig_back.png';
+            pigContainer.style.transition = 'none';
+            pigContainer.style.opacity = '0';
+            requestAnimationFrame(() => {
+                pigContainer.style.transition = '';
+            });
+        } else {
+            root.classList.remove('traveling');
+            pigContainer.style.opacity = '1';
+        }
+    }
+
     // --- 初始化游戏 ---
     window.onload = async () => {
         await initGameData();
+        applyUIText();
+        applyTravelVisualState();
         updateUI();
         renderShop();
+        renderBackpack();
         renderMap();
         checkTravelStatus();
-        setInterval(spawnStar, gameConfig.star_spawn_interval); 
+        const rate = Number(gameConfig.stars_per_second) || 0;
+        const refreshMs = rate > 0 ? Math.max(100, Math.round(1000 / rate)) : gameConfig.star_refresh_rate;
+        setInterval(spawnStar, refreshMs); 
     };
 </script>
 </body>
