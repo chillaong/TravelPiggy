@@ -204,6 +204,59 @@
     let selectedFoodName = null;
     let selectedGearName = null;
 
+    // --- 测试模式（通过 URL 参数启用，使用 ?test=1） ---
+    const TEST_MODE = new URLSearchParams(window.location.search).get('test') === '1';
+    const TEST_TRAVEL_MINUTES = 0.5; // 0.5 分钟（30 秒）
+    let __test_backup_prefix = null;
+
+    function backupLocalStorageForTest() {
+        if (!TEST_MODE) return;
+        const keys = ['pig_stars','pig_inventory','pig_travel_end','pig_travel_payload','pig_album','pig_album_records'];
+        __test_backup_prefix = 'pig_test_backup_' + Date.now();
+        keys.forEach(k => {
+            const v = localStorage.getItem(k);
+            localStorage.setItem(__test_backup_prefix + '_' + k, v === null ? '__NULL__' : v);
+        });
+        console.log('TEST MODE: backed up localStorage keys with prefix', __test_backup_prefix);
+    }
+
+    function restoreLocalStorageFromTest() {
+        if (!__test_backup_prefix) {
+            console.warn('TEST MODE: no backup prefix found');
+            return;
+        }
+        const keys = ['pig_stars','pig_inventory','pig_travel_end','pig_travel_payload','pig_album','pig_album_records'];
+        keys.forEach(k => {
+            const bk = localStorage.getItem(__test_backup_prefix + '_' + k);
+            if (bk === null) return;
+            if (bk === '__NULL__') localStorage.removeItem(k);
+            else localStorage.setItem(k, bk);
+            localStorage.removeItem(__test_backup_prefix + '_' + k);
+        });
+        console.log('TEST MODE: restored localStorage from backup prefix', __test_backup_prefix);
+        __test_backup_prefix = null;
+    }
+
+    function applyTestOverridesAfterInit() {
+        if (!TEST_MODE) return;
+        try {
+            backupLocalStorageForTest();
+            // set stars
+            localStorage.setItem('pig_stars', '1000');
+            // set inventory: 99 of each item
+            const inv = {};
+            items.forEach(it => { inv[it.name] = 99; });
+            localStorage.setItem('pig_inventory', JSON.stringify(inv));
+            // reload in-memory inventory
+            loadInventory();
+            console.log('TEST MODE: applied overrides — stars=1000, each item count=99, travel time overridden to', TEST_TRAVEL_MINUTES, 'minutes');
+            // expose restore function for convenience
+            window.restoreTestData = restoreLocalStorageFromTest;
+        } catch (e) {
+            console.error('TEST MODE: failed to apply overrides', e);
+        }
+    }
+
     // --- CSV 加载和解析 ---
     function parseCSV(text) {
         const rows = [];
@@ -593,7 +646,8 @@
     }
 
     function beginTravel(travelItem, gearItem) {
-        const endTime = Date.now() + travelItem.time * 60 * 1000;
+        const durationMinutes = TEST_MODE ? TEST_TRAVEL_MINUTES : travelItem.time;
+        const endTime = Date.now() + durationMinutes * 60 * 1000;
         travelEndTime = endTime;
         localStorage.setItem('pig_travel_end', endTime);
 
@@ -818,6 +872,8 @@
     // --- 初始化游戏 ---
     window.onload = async () => {
         await initGameData();
+        // apply test overrides (if ?test=1 is present in URL)
+        applyTestOverridesAfterInit();
         applyUIText();
         applyTravelVisualState();
         updateUI();
