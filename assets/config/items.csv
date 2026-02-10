@@ -4,6 +4,6 @@ name,cost,time,img,type,weight_bonus,effect
 能量棒,8,1,assets/items/granola_bar.png,food,4,
 汉堡,20,3,assets/items/burger.png,food,5,
 帐篷,30,5,assets/items/tent.png,gear,8,
-相机,50,8,assets/items/camera.png,gear,10,stamp
+相机,50,8,assets/items/camera.png,gear,10
 无人机,80,10,assets/items/drone.png,gear,15,double
 椰子,12,2,assets/items/coconut.png,food,4,
