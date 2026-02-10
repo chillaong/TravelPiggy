@@ -4,7 +4,7 @@ PARIS,巴黎,48,28,1,assets/scenes/postcards/Parisa.png,assets/scenes/postcards_
 EGYPT,埃及,54,42,1,assets/scenes/postcards/Egypta.png,assets/scenes/postcards_by_drone/EGYPT_B.png,20,-12,600000
 USHUAIA,乌斯怀亚,28,82,2,assets/scenes/postcards/UshA.png,assets/scenes/postcards_by_drone/USHUAIA_B.png,25,-20,600000
 TASMANIA,塔斯马尼亚,82,78,3,assets/scenes/postcards/tasa.png,assets/scenes/postcards_by_drone/TASMANIA_B.png,30,-25,900000
-INDONESIA,印度尼西亚,65,70,2,assets/scenes/postcards/indonesia_a.png,assets/scenes/postcards_by_drone/indonesia_b.png,22,-18,600000
-ITALY,意大利,50,40,2,assets/scenes/postcards/italy_a.png,assets/scenes/postcards_by_drone/italy_b.png,24,-16,600000
-JP,日本,75,20,1,assets/scenes/postcards/japan_a.png,assets/scenes/postcards_by_drone/japan_b.png,18,-12,300000
-SH,瑞士,30,60,3,assets/scenes/postcards/switzerland_a.png,assets/scenes/postcards_by_drone/switzerland_b.png,28,-20,900000
+INDONESIA,印度尼西亚,65,70,2,assets/scenes/postcards/INa.png,assets/scenes/postcards_by_drone/IN_B.png,22,-18,600000
+ITALY,意大利,50,40,2,assets/scenes/postcards/Italya.png,assets/scenes/postcards_by_drone/ItalyB.png,24,-16,600000
+JP,日本,75,20,1,assets/scenes/postcards/JPa.png,assets/scenes/postcards_by_drone/JP_B.png,18,-12,300000
+SH,瑞士,30,60,3,assets/scenes/postcards/SHa.png,assets/scenes/postcards_by_drone/SH2.png,28,-20,900000
