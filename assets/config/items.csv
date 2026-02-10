@@ -1,8 +1,9 @@
-name,cost,time,img
-巧克力,5,0.5,assets/items/chocolate.png
-汉堡,20,3,assets/items/burger.png
-帐篷,30,5,assets/items/tent.png
-能量棒,8,1,assets/items/granola_bar.png
-便当,20,3,assets/items/bento.png
-相机,50,8,assets/items/camera.png
-无人机,80,10,assets/items/drone.png
+name,cost,time,img,type,weight_bonus
+巧克力,5,0.5,assets/items/chocolate.png,food,3
+便当,20,3,assets/items/bento.png,food,5
+能量棒,8,1,assets/items/granola_bar.png,food,4
+汉堡,20,3,assets/items/burger.png,food,5
+帐篷,30,5,assets/items/tent.png,gear,8
+相机,50,8,assets/items/camera.png,gear,10
+无人机,80,10,assets/items/drone.png,gear,15
+椰子,12,2,assets/items/coconut.png,food,4

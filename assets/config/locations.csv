@@ -1,6 +1,10 @@
-id,name,x,y,tier,img,img_B,text1,text2,text3
-LA,洛杉矶,18,35,1,assets/scenes/postcards/LAa.png,assets/scenes/postcards_by_drone/LA_B.png,阳光真好,星光大道打卡,好莱坞的风
-PARIS,巴黎,48,28,1,assets/scenes/postcards/Parisa.png,assets/scenes/postcards_by_drone/PARIS_B.png,铁塔下的风,浪漫的午后,塞纳河畔
-EGYPT,埃及,54,42,1,assets/scenes/postcards/Egypta.png,assets/scenes/postcards_by_drone/EGYPT_B.png,神秘金字塔,沙漠的驼铃,历史的尘埃
-USHUAIA,乌斯怀亚,28,82,2,assets/scenes/postcards/UshA.png,assets/scenes/postcards_by_drone/USHUAIA_B.png,世界尽头,冰川的呼唤,寒冷的浪漫
-TASMANIA,塔斯马尼亚,82,78,3,assets/scenes/postcards/tasa.png,assets/scenes/postcards_by_drone/TASMANIA_B.png,南半球极光,纯净的空气,自然的奇迹
+id,name,x,y,tier,img,img_B,base_weight,cooldown_penalty,cooldown_time
+LA,洛杉矶,18,35,1,assets/scenes/postcards/LAa.png,assets/scenes/postcards_by_drone/LA_B.png,10,-10,180000
+PARIS,巴黎,48,28,1,assets/scenes/postcards/Parisa.png,assets/scenes/postcards_by_drone/PARIS_B.png,15,-15,300000
+EGYPT,埃及,54,42,1,assets/scenes/postcards/Egypta.png,assets/scenes/postcards_by_drone/EGYPT_B.png,20,-12,600000
+USHUAIA,乌斯怀亚,28,82,2,assets/scenes/postcards/UshA.png,assets/scenes/postcards_by_drone/USHUAIA_B.png,25,-20,600000
+TASMANIA,塔斯马尼亚,82,78,3,assets/scenes/postcards/tasa.png,assets/scenes/postcards_by_drone/TASMANIA_B.png,30,-25,900000
+INDONESIA,印度尼西亚,65,70,2,assets/scenes/postcards/indonesia_a.png,assets/scenes/postcards_by_drone/indonesia_b.png,22,-18,600000
+ITALY,意大利,50,40,2,assets/scenes/postcards/italy_a.png,assets/scenes/postcards_by_drone/italy_b.png,24,-16,600000
+JP,日本,75,20,1,assets/scenes/postcards/japan_a.png,assets/scenes/postcards_by_drone/japan_b.png,18,-12,300000
+SH,瑞士,30,60,3,assets/scenes/postcards/switzerland_a.png,assets/scenes/postcards_by_drone/switzerland_b.png,28,-20,900000
