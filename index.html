@@ -752,19 +752,19 @@
     function renderMap() {
         const map = document.getElementById('map-view');
         map.innerHTML = '';
-        
-        locations.forEach(loc => {
-            const isUnlocked = albumRecords.some(record => record.locationId === loc.id);
-            const pin = document.createElement('div');
-            pin.className = `map-pin ${isUnlocked ? 'pin-unlocked' : 'pin-locked'}`;
-            pin.style.left = loc.x + '%';
-            pin.style.top = loc.y + '%';
-            
-            if (isUnlocked) {
+        // 只渲染已解锁的地点，未解锁不显示 pin
+        const unlockedIds = new Set((albumRecords || []).map(record => record.locationId));
+
+        locations
+            .filter(loc => unlockedIds.has(loc.id))
+            .forEach(loc => {
+                const pin = document.createElement('div');
+                pin.className = 'map-pin pin-unlocked';
+                pin.style.left = loc.x + '%';
+                pin.style.top = loc.y + '%';
                 pin.onclick = () => showPhoto(loc.id, 'A');
-            }
-            map.appendChild(pin);
-        });
+                map.appendChild(pin);
+            });
     }
 
     function showPhoto(locId, angle) {
