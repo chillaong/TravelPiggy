@@ -105,11 +105,56 @@
 
         /* --- 拍立得照片详情 --- */
         #photo-modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; aspect-ratio: 3/4; perspective: 1000px; }
-        .polaroid { position: relative; width: 100%; height: 100%; overflow: visible; transform: rotate(-2deg); box-shadow: 0 20px 50px rgba(0,0,0,0.5); transition: transform 0.3s; }
+        .polaroid {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+            transform: rotate(-2deg);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            transition: transform 0.3s;
+            background: var(--bg-color, #fdf6e3); /* 填充纸张背景色，避免透明边缘透出深色背景 */
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            transform: translateZ(0); /* 触发复合层以减少抗锯齿伪影 */
+            will-change: transform;
+        }
         /* 这里的 frame 也在 ui 文件夹 */
-        .polaroid img.frame { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 20; pointer-events: none; }
-        .polaroid img.bg { position: absolute; width: 96%; height: 88%; object-fit: contain; top: 2%; left: 2%; z-index: 1; border-radius: 2px; display: block; }
-        .polaroid img.char { position: absolute; bottom: 25%; right: 10%; width: 45%; height: auto; z-index: 5; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.3)); display: block; }
+        .polaroid img.frame {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 20;
+            pointer-events: none;
+            background-color: transparent;
+            image-rendering: auto;
+        }
+        .polaroid img.bg {
+            position: absolute;
+            width: 96%;
+            height: 88%;
+            object-fit: cover; /* use cover to fill uniformly */
+            top: 2%;
+            left: 2%;
+            z-index: 1;
+            border-radius: 2px;
+            display: block;
+            background-color: var(--bg-color, #fdf6e3);
+        }
+        .polaroid img.char {
+            position: absolute;
+            bottom: 25%;
+            right: 10%;
+            width: 45%;
+            height: auto;
+            z-index: 5;
+            filter: drop-shadow(0 2px 5px rgba(0,0,0,0.3));
+            display: block;
+            transform: scale(1);
+            transform-origin: center;
+        }
         .photo-text { position: absolute; bottom: 5%; width: 100%; text-align: center; font-family: 'Zhi Mang Xing', cursive; font-size: 30px; color: #444; z-index: 30; transform: rotate(2deg); opacity: 0.9; }
 
     </style>
@@ -713,6 +758,19 @@
         const applyStamp = travelPayload?.gearEffect === 'stamp';
         const applyDouble = travelPayload?.gearEffect === 'double';
 
+        // Debug: log travel payload / location / effect and check img_B accessibility
+        try {
+            console.log('finishTravel payload', { travelPayload, applyStamp, applyDouble, newLoc });
+            if (applyDouble && newLoc && newLoc.img_B) {
+                const _imgCheck = new Image();
+                _imgCheck.onload = () => console.log('img_B loaded OK', newLoc.img_B);
+                _imgCheck.onerror = () => console.warn('img_B failed to load', newLoc.img_B);
+                _imgCheck.src = newLoc.img_B;
+            } else if (applyDouble) {
+                console.warn('applyDouble true but newLoc.img_B missing or falsy', newLoc && newLoc.img_B);
+            }
+        } catch (e) { console.warn('finishTravel debug logging failed', e); }
+
         const updateRecord = (angle) => {
             const existing = albumRecords.find(record => record.locationId === newLoc.id && record.angle === angle);
             if (existing) {
@@ -830,10 +888,9 @@
             btnNext.onclick = () => showPhoto(locId, 'B');
         }
 
-        // 随机构图
+        // 固定小猪显示大小（移除随机缩放）
         const pigChar = document.getElementById('p-char');
-        const scale = 0.8 + Math.random() * 0.4; 
-        pigChar.style.transform = `scale(${scale})`;
+        if (pigChar) pigChar.style.transform = 'scale(1)';
         
         document.getElementById('overlay-photo').style.display = 'block';
     }

@@ -142,6 +142,15 @@ find assets -type f \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" \) \
 
 ## 更新日志
 
+
+- v1.4.1 - 2026-02-13
+  - 新增本地测试/调试页面：`preview_test.html`（自动跳转到 `index.html?test=1`，开启测试覆盖：星星=1000、所有物品=99、出行时间=0.5 分钟）
+  - 新增调试图集预览页：`debug_photos.html`，并排展示每个地点的 A/B 明信片（支持 `?id=LA` 精确查看），便于调整图片裁切与缩放
+  - 修复拍立得相框边缘半透明（halo）问题：为 `.polaroid` 添加纸张背景色、`backface-visibility` 与 `transform: translateZ(0)` 等 CSS 优化，减少 transform 后的抗锯齿伪影
+  - 移除相册中小猪的随机缩放（`p-char` 现在固定 `scale(1)`），保证展示稳定
+  - 在 `finishTravel()` 中加入调试日志和对 `img_B` 的预加载检测，方便诊断 A/B 图片加载问题
+  - 提示：所有以上改动已在本地文件中应用，默认仅本地 commit（不会自动推送到远端），便于你先在本地验证
+
 - v1.4.0 - 2026-02-10
   - 新增旅行目的地：意大利、日本、瑞士，支持A/B视角明信片素材
   - 新增道具：椰子，支持权重加成
@@ -176,3 +185,4 @@ find assets -type f \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" \) \
   - 商店和旅行系统
   - 相册系统
   - 本地数据保存
+

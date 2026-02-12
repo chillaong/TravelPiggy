@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Debug Photo Preview</title>
+  <style>
+    body{font-family:Segoe UI,Arial;background:#f7f7f7;margin:20px;color:#222}
+    .grid{display:flex;flex-wrap:wrap;gap:16px}
+    .card{width:320px;background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.08);overflow:hidden}
+    .polaroid{position:relative;padding:12px;background:#fff}
+    .polaroid img.bg{width:100%;height:200px;object-fit:cover;display:block}
+    .meta{padding:8px 12px;font-size:13px;color:#555}
+    .meta b{color:#222}
+    .row{display:flex;gap:8px;padding:8px}
+    .row img{width:48%;height:120px;object-fit:cover;border:1px solid #eee}
+    header{margin-bottom:12px}
+    .controls{margin-bottom:12px}
+  </style>
+</head>
+<body>
+  <header>
+    <h2>调试：地点 A / B 照片预览</h2>
+    <div class="controls">若要只看某个 id，请在 URL 后加上 `?id=LA`（例如：<a href="debug_photos.html?id=LA">debug_photos.html?id=LA</a>）。</div>
+  </header>
+  <div id="grid" class="grid"></div>
+
+<script>
+async function loadCSV(path){
+  const r = await fetch(path, {cache:'no-store'});
+  const txt = await r.text();
+  const rows = txt.split('\n').map(l=>l.trim()).filter(Boolean);
+  const hdr = rows.shift().split(',').map(h=>h.trim());
+  return rows.map(r=>{
+    const cols = r.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(c=>c.trim());
+    const obj = {};
+    hdr.forEach((h,i)=> obj[h]= (cols[i]||'').replace(/^"|"$/g, ''));
+    return obj;
+  });
+}
+
+function q(name){return new URLSearchParams(location.search).get(name);}
+
+(async ()=>{
+  const idFilter = q('id');
+  let locs = await loadCSV('assets/config/locations.csv');
+  if(idFilter) locs = locs.filter(l=>l.id===idFilter);
+  const grid = document.getElementById('grid');
+  locs.forEach(loc=>{
+    const card = document.createElement('div'); card.className='card';
+    const pol = document.createElement('div'); pol.className='polaroid';
+    const title = document.createElement('div'); title.className='meta'; title.innerHTML = `<b>${loc.name} (${loc.id})</b>`;
+    const row = document.createElement('div'); row.className='row';
+    const imgA = document.createElement('img'); imgA.src = loc.img; imgA.alt='A'; imgA.onerror = ()=>{ imgA.style.opacity=0.4; imgA.title='加载失败'; };
+    const imgB = document.createElement('img'); imgB.src = loc.img_B; imgB.alt='B'; imgB.onerror = ()=>{ imgB.style.opacity=0.4; imgB.title='加载失败'; };
+    row.appendChild(imgA); row.appendChild(imgB);
+    pol.appendChild(row);
+    card.appendChild(pol);
+    card.appendChild(title);
+    const meta = document.createElement('div'); meta.className='meta'; meta.innerHTML = `img: ${loc.img}<br>img_B: ${loc.img_B}`;
+    card.appendChild(meta);
+    grid.appendChild(card);
+  });
+})();
+</script>
+</body>
+</html>
