@@ -792,8 +792,13 @@
         }
 
         updateRecord('A');
-        if (applyDouble && newLoc.img_B) {
-            updateRecord('B');
+        if (applyDouble) {
+            if (newLoc.img_B) {
+                updateRecord('B');
+            } else {
+                // If location has no B-angle image, give an extra A (increment count)
+                updateRecord('A');
+            }
         }
 
         localStorage.setItem('pig_album_records', JSON.stringify(albumRecords));
