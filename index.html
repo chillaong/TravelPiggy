@@ -18,8 +18,8 @@
 
         /* --- 角色动画 --- */
         .pig-container { position: absolute; bottom: 3%; left: 50%; transform: translateX(-50%); width: 45%; cursor: pointer; z-index: 10; transition: opacity 0.5s; }
-        /* Prevent initial flash when page loads during travel */
-        .traveling .pig-container { opacity: 0; transition: none; }
+            /* Prevent initial flash when page loads during travel; disable interaction but keep transition so back animation can play */
+            .traveling .pig-container { opacity: 0; pointer-events: none; }
         #pig-img { width: 100%; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2)); }
         .breathe { animation: breathe 3s ease-in-out infinite; }
         @keyframes breathe { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-3%) scale(1.02); } }
