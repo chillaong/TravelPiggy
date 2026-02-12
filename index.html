@@ -661,11 +661,20 @@
         };
         localStorage.setItem('pig_travel_payload', JSON.stringify(travelPayload));
 
+        // 标记正在出发并禁止交互（CSS + inline 双重保障）
+        try { document.documentElement.classList.add('traveling'); } catch(e) {}
+
         // 切换背影 -> 渐隐消失
         const pig = document.getElementById('pig-img');
         pig.src = 'assets/characters/pig_back.png';
         
         const pigContainer = document.querySelector('.pig-container');
+        try {
+            pigContainer.style.pointerEvents = 'none';
+            pigContainer.style.cursor = 'default';
+            pigContainer.onclick = null;
+        } catch(e) {}
+
         pigContainer.style.transition = 'opacity 3s ease-out';
         pigContainer.style.opacity = '1';
         
@@ -738,6 +747,9 @@
         const pigImg = document.getElementById('pig-img');
         pigImg.src = 'assets/characters/pig_idel.png';
         pigContainer.style.opacity = '1';
+        // 恢复交互
+        try { document.documentElement.classList.remove('traveling'); } catch(e) {}
+        try { pigContainer.style.pointerEvents = ''; pigContainer.style.cursor = 'pointer'; pigContainer.onclick = interactPig; } catch(e) {}
 
         travelPayload = null;
         localStorage.removeItem('pig_travel_payload');
